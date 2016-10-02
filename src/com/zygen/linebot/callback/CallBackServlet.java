@@ -2,6 +2,8 @@ package com.zygen.linebot.callback;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
 import javax.servlet.ServletException;
@@ -131,36 +133,41 @@ public class CallBackServlet extends HttpServlet {
 	        	final TextMessageContent text = (TextMessageContent) messageEvent.getMessage();
 	        	String linetext = text.getText();
 	        	TextMessage textMessage = new TextMessage("return text" + linetext);
-	        	//List<TextMessage> textMessages = Collections.singletonList(textMessage);
-	        	//List<TextMessage> textMessages = Arrays.asList(textMessage);
-	        	//ReplyMessage reply = new ReplyMessage(messageEvent.getReplyToken(),(Message)textMessage);
-	        	//response.getWriter().print(reply.toJSON(true));
-	        	//BotApiResponse apiResponse = lineMessagingService.replyMessage(reply).execute().body();
-	        	//response.getWriter().print(apiResponse);
-	        	
-	        	//TextMessage textMessage = new TextMessage("hello");
+
 	        	ReplyMessage replyMessage = new ReplyMessage(
 	        			messageEvent.getReplyToken(),
 	        	        (Message)textMessage
 	        	);
-	        	//response.getWriter().print(replyMessage.toJSON(true));
-	        	//doAdd(linetext,replyMessage.toJSON(true));
+
 	        	Response<BotApiResponse> res =
 	        	        LineMessagingServiceBuilder
 	        	                .create(chanelAccessToken)
 	        	                .build()
 	        	                .replyMessage(replyMessage)
 	        	                .execute();
-	        	//response.getWriter().print(replyMessage.toJSON(true));
-	        	LOGGER.info("CODE:" + Integer.toString(res.code()));
-	        	//System.out.println(response.code() + " " + response.message());
+
+	        	if ( res.code() != 200 ){
+	        		String error = this.readStream(res.errorBody().byteStream());
+	        		LOGGER.debug("BODY: "+ error);
+	        	}
 	        }
 		} catch (Exception e) {
 			response.getWriter().println("Parser error: " + e.getMessage());
 			LOGGER.error("Parse error", e);
 		}
 	}
-
+	private String readStream(InputStream stream) throws Exception {
+	    StringBuilder builder = new StringBuilder();
+	    try (BufferedReader in = new BufferedReader(new InputStreamReader(stream))) {
+	        String line;
+	        while ((line = in.readLine()) != null) {
+	            builder.append(line); // + "\r\n"(no need, json has no line breaks!)
+	        }
+	        in.close();
+	    }
+	    //System.out.println("JSON: " + builder.toString());
+	    return builder.toString();
+	}
 	/*
 	 * public void doFilter(HttpServletRequest request, HttpServletResponse
 	 * response, FilterChain chain) throws IOException, ServletException { //

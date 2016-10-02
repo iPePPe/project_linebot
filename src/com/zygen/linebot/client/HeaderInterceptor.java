@@ -23,7 +23,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 class HeaderInterceptor implements Interceptor {
-    private static final String USER_AGENT = "line-botsdk-java/" +
+    private static final String USER_AGENT = "ZyGen-BOT/" +
                                      HeaderInterceptor.class.getPackage().getImplementationVersion();
     private final String channelToken;
 
@@ -34,8 +34,9 @@ class HeaderInterceptor implements Interceptor {
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request().newBuilder()
+        					   .addHeader("Content-Type", "application/json")
                                .addHeader("Authorization", "Bearer " + channelToken)
-                               .addHeader("User-Agent", USER_AGENT)
+                               //.addHeader("User-Agent", USER_AGENT)
                                .build();
         return chain.proceed(request);
     }
