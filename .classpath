@@ -22,6 +22,5 @@
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/User/neon/workspace/persistence-with-jdbc/WebContent/WEB-INF/lib/com.sap.security.core.server.csi_1.0.8.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

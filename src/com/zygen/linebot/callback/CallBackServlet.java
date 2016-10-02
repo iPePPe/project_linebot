@@ -25,6 +25,7 @@ import com.google.common.io.ByteStreams;
 import com.zygen.linebot.model.event.Event;
 import com.zygen.linebot.model.event.MessageEvent;
 import com.zygen.linebot.model.event.message.TextMessageContent;
+import com.zygen.linebot.model.message.Message;
 import com.zygen.linebot.model.message.TextMessage;
 import com.zygen.linebot.model.response.BotApiResponse;
 import com.zygen.linebot.model.ReplyMessage;
@@ -86,6 +87,7 @@ public class CallBackServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		// TODO Auto-generated method stub
+		response.getWriter().print("PePPe Online.....");
 
 	}
 
@@ -139,7 +141,7 @@ public class CallBackServlet extends HttpServlet {
 	        	//TextMessage textMessage = new TextMessage("hello");
 	        	ReplyMessage replyMessage = new ReplyMessage(
 	        			messageEvent.getReplyToken(),
-	        	        textMessage
+	        	        (Message)textMessage
 	        	);
 	        	//response.getWriter().print(replyMessage.toJSON(true));
 	        	//doAdd(linetext,replyMessage.toJSON(true));
@@ -149,6 +151,8 @@ public class CallBackServlet extends HttpServlet {
 	        	                .build()
 	        	                .replyMessage(replyMessage)
 	        	                .execute();
+	        	//response.getWriter().print(replyMessage.toJSON(true));
+	        	LOGGER.info("CODE:" + Integer.toString(res.code()));
 	        	//System.out.println(response.code() + " " + response.message());
 	        }
 		} catch (Exception e) {
