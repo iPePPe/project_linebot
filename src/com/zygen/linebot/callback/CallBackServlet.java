@@ -57,8 +57,6 @@ public class CallBackServlet extends HttpServlet {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CallBackServlet.class);
 	private final LineSignatureValidator lineSignatureValidator;
 	private final ObjectMapper objectMapper;
-	//private LineMessageDAO lineDAO;
-	//private LineMessagingService lineMessagingService;
 	private static final String channelSecret = "f423494d7fc1881b5171ab65cb15b1d1";
 	private static final String chanelAccessToken = "enCA8ygHaHvpPDRoGjxSlJh7/k84nPgTvFXJWIzTJsh6emQ/7pO4FYTUKdjK7Feislf31SieH2vZ+Pw4UvjQuWB6R7fHbmmaArv+bymUuJoOjf1skErDOZAuOcSU5PcWXxfjH3htlXo7LrOvQvmkgQdB04t89/1O/w1cDnyilFU=";
     public CallBackServlet() {
