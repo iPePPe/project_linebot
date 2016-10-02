@@ -20,14 +20,4 @@
     <servlet-name>CallBackServlet</servlet-name>
     <url-pattern>/CallBackServlet</url-pattern>
   </servlet-mapping>
-  <servlet>
-    <description></description>
-    <display-name>LineMessageServlet</display-name>
-    <servlet-name>LineMessageServlet</servlet-name>
-    <servlet-class>com.zygen.linebot.callback.LineMessageServlet</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>LineMessageServlet</servlet-name>
-    <url-pattern>/LineMessageServlet</url-pattern>
-  </servlet-mapping>
 </web-app>
