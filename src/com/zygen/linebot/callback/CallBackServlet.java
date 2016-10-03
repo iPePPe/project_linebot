@@ -109,7 +109,7 @@ public class CallBackServlet extends HttpServlet {
 		// TODO Auto-generated method stub
 		try {
 			//doAdd(request);
-			
+			String channelid = request.getParameter("ch");
 	        String signature = request.getHeader("X-Line-Signature");
 	        if (signature == null || signature.length() == 0) {
 	            throw new CallBackServletException("Missing 'X-Line-Signature' header");
