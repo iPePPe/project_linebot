@@ -30,6 +30,8 @@ import com.zygen.linebot.model.event.message.TextMessageContent;
 import com.zygen.linebot.model.message.Message;
 import com.zygen.linebot.model.message.TextMessage;
 import com.zygen.linebot.model.response.BotApiResponse;
+import com.zygen.odata.client.ZyGenMessageBuilder;
+import com.zygen.odata.model.message.ZtextMessage;
 import com.zygen.linebot.model.ReplyMessage;
 import com.zygen.linebot.model.event.CallbackRequest;
 import com.zygen.linebot.client.LineMessagingServiceBuilder;
@@ -130,11 +132,14 @@ public class CallBackServlet extends HttpServlet {
 	        	final MessageEvent messageEvent = (MessageEvent) result.get(0);
 	        	final TextMessageContent text = (TextMessageContent) messageEvent.getMessage();
 	        	String linetext = text.getText();
-	        	TextMessage textMessage = new TextMessage("return text" + linetext);
-
+	        	ZtextMessage ztext = new ZtextMessage(linetext);
+	        	ZyGenMessageBuilder zg = new ZyGenMessageBuilder("ZGFMLGW1Set",ztext.getId());
+	        	//TextMessage textMessage = new TextMessage("return text" + linetext);
+	        	List<TextMessage> textMessage = zg.getLineTextMessage();
+	        	//List<Message> message = (List<Message>)(Object)textMessage;
 	        	ReplyMessage replyMessage = new ReplyMessage(
 	        			messageEvent.getReplyToken(),
-	        	        (Message)textMessage
+	        	        (List<Message>)(Object)textMessage
 	        	);
 
 	        	Response<BotApiResponse> res =

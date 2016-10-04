@@ -21,6 +21,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonTypeName("text")
 public class TextMessage implements Message {
     private final String text ;
+    public TextMessage(){
+    	text = "";
+    }
     public TextMessage(String text){
     	this.text = text;
     }
