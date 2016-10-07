@@ -4,7 +4,7 @@
 	<groupId>LineBOT</groupId>
 	<artifactId>LineBOT</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>pom</packaging>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
@@ -115,5 +115,9 @@
 		</dependency>
 
 
+
 	</dependencies>
+	<modules>
+		<module>LineBOT-jpa</module>
+	</modules>
 </project>

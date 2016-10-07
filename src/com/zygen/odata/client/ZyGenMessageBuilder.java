@@ -8,6 +8,11 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -33,6 +38,16 @@ import org.apache.olingo.odata2.api.ep.feed.ODataFeed;
 import org.apache.olingo.odata2.api.exception.ODataException;
 import org.apache.olingo.odata2.api.processor.ODataResponse;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+//import javax.net.ssl.KeyManagerFactory;
+//import javax.net.ssl.SSLContext;
+//import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManagerFactory;
+
+import com.sap.core.connectivity.api.configuration.ConnectivityConfiguration;
+import com.sap.core.connectivity.api.configuration.DestinationConfiguration;
 import com.zygen.linebot.model.message.TextMessage;
 
 public class ZyGenMessageBuilder {
@@ -51,6 +66,7 @@ public class ZyGenMessageBuilder {
 	public static final String METADATA = "$metadata";
 	public static final String INDEX = "/index.jsp";
 	public static final String SEPARATOR = "/";
+	public static final String DESTINATION = "sap-gateway-service";
 
 	public static final boolean PRINT_RAW_CONTENT = true;
 	public static String serviceUrl;
@@ -70,15 +86,33 @@ public class ZyGenMessageBuilder {
 	}
 
 	public ZyGenMessageBuilder(String entityname, String id) {
-		serviceUrl = "http://zygenplay.com:8082/sap/opu/odata/ZGL01/ZGL01_SRV";
+		//serviceUrl = "http://zygenplay.com:8082/sap/opu/odata/ZGL01/ZGL01_SRV";
+		//serviceUrl = getUrlFromDestination(DESTINATION);
 		entitySetName = entityname;
 		usedFormat = APPLICATION_JSON;
 		oid = id;
 	}
+	private static String getUrlFromDestination(String destination){
+		Context ctx;
+		String dest = null;
+		try {
+			ctx = new InitialContext();
+			ConnectivityConfiguration configuration = (ConnectivityConfiguration) ctx
+					.lookup("java:comp/env/connectivityConfiguration");
+			// get destination configuration for "myDestinationName"
+			DestinationConfiguration destConfiguration = configuration.getConfiguration(destination);
+			dest = destConfiguration.getProperty("URL");
+			
+		} catch (NamingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return dest;
 
+	}
 	public static void main(String[] paras) throws Exception {
-
-		ZyGenMessageBuilder app = new ZyGenMessageBuilder("http://zygenplay.com:8082/sap/opu/odata/ZGL01/ZGL01_SRV",
+		String url = getUrlFromDestination(DESTINATION);
+		ZyGenMessageBuilder app = new ZyGenMessageBuilder(url,
 				"ZGFMLGW1Set",
 				"IvLmid='07fbfe1943d58b1d0e5257c04f9b203551aa7077f62429228057b45e3cc37e57e4',IvChannel='1472660011',IvString='bd-pe'",
 				APPLICATION_JSON);
@@ -101,15 +135,15 @@ public class ZyGenMessageBuilder {
 	public List<TextMessage> getLineTextMessage() throws Exception {
 		List<TextMessage> text = new ArrayList<TextMessage>();
 		List<String> rets = new ArrayList<String>();
-		Edm edm = this.readEdm(serviceUrl);
-		ODataEntry entry = readEntry(edm, serviceUrl, usedFormat, entitySetName, oid);
+		Edm edm = this.readEdm(getUrlFromDestination(DESTINATION));
+		ODataEntry entry = readEntry(edm, getUrlFromDestination(DESTINATION), usedFormat, entitySetName, oid);
 		Map<String, Object> properties = entry.getProperties();
 		Set<Entry<String, Object>> entries = properties.entrySet();
 		for (Entry<String, Object> ent : entries) {
 			if (ent.getKey().equals("EvString")) {
 				rets = splitEqually((String) ent.getValue(), 800);
 				for (int i = 0; i < rets.size(); i++) {
-					//System.out.println(arrJavaTechnologies.get(i));
+					// System.out.println(arrJavaTechnologies.get(i));
 					text.add(new TextMessage(rets.get(i)));
 				}
 				// rets.forEach(ret -> text.add(new TextMessage((String)
@@ -416,5 +450,53 @@ public class ZyGenMessageBuilder {
 		}
 
 		return connection;
+	}
+
+	private HttpURLConnection initializeConnectionFromDestination(String destination, String contentType,
+			String httpMethod) throws MalformedURLException, IOException, NamingException{
+
+		try {
+			// look up the connectivity configuration API
+			// "connectivityConfiguration"
+			Context ctx = new InitialContext();
+			ConnectivityConfiguration configuration = (ConnectivityConfiguration) ctx
+					.lookup("java:comp/env/connectivityConfiguration");
+			// get destination configuration for "myDestinationName"
+			DestinationConfiguration destConfiguration = configuration.getConfiguration(destination);
+			
+
+			// get the configured keystore
+			//KeyStore keyStore = destConfiguration.getKeyStore();
+			 
+			// get the configured truststore
+			//KeyStore trustStore = destConfiguration.getTrustStore();
+			 
+			// create sslcontext
+			//TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+			//tmf.init(trustStore);
+			 
+			//KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+			//String keyStorePassword = "myPassword";
+			//keyManagerFactory.init(keyStore, keyStorePassword.toCharArray());
+			 
+			//SSLContext sslcontext = SSLContext.getInstance("TLSv1");
+			//sslcontext.init(keyManagerFactory.getKeyManagers(), tmf.getTrustManagers(), null);
+			//SSLSocketFactory sslSocketFactory = sslcontext.getSocketFactory();
+			
+			URL url = new URL(destConfiguration.getProperty("URL"));
+			
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			
+			connection.setRequestMethod(httpMethod);
+			connection.setRequestProperty(HTTP_HEADER_ACCEPT, contentType);
+			if (HTTP_METHOD_POST.equals(httpMethod) || HTTP_METHOD_PUT.equals(httpMethod)) {
+				connection.setDoOutput(true);
+				connection.setRequestProperty(HTTP_HEADER_CONTENT_TYPE, contentType);
+			}
+			return connection;
+		} catch (NamingException e) {
+			throw new NamingException();
+		}
+		
 	}
 }

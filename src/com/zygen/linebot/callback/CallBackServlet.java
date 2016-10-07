@@ -27,6 +27,8 @@ import com.google.common.io.ByteStreams;
 import com.zygen.linebot.model.event.Event;
 import com.zygen.linebot.model.event.MessageEvent;
 import com.zygen.linebot.model.event.message.TextMessageContent;
+import com.zygen.linebot.model.event.source.Source;
+import com.zygen.linebot.model.event.source.UserSource;
 import com.zygen.linebot.model.message.Message;
 import com.zygen.linebot.model.message.TextMessage;
 import com.zygen.linebot.model.response.BotApiResponse;
@@ -111,7 +113,7 @@ public class CallBackServlet extends HttpServlet {
 		// TODO Auto-generated method stub
 		try {
 			//doAdd(request);
-			String channelid = request.getParameter("ch");
+			String channelId = request.getParameter("ch");
 	        String signature = request.getHeader("X-Line-Signature");
 	        if (signature == null || signature.length() == 0) {
 	            throw new CallBackServletException("Missing 'X-Line-Signature' header");
@@ -130,9 +132,11 @@ public class CallBackServlet extends HttpServlet {
 	        }else{
 	        	final List<Event> result = callbackRequest.getEvents();
 	        	final MessageEvent messageEvent = (MessageEvent) result.get(0);
+	        	final UserSource source = (UserSource)messageEvent.getSource();
+	        	final String userId = source.getUserId();
 	        	final TextMessageContent text = (TextMessageContent) messageEvent.getMessage();
 	        	String linetext = text.getText();
-	        	ZtextMessage ztext = new ZtextMessage(linetext);
+	        	ZtextMessage ztext = new ZtextMessage(channelId,userId,linetext);
 	        	ZyGenMessageBuilder zg = new ZyGenMessageBuilder("ZGFMLGW1Set",ztext.getId());
 	        	//TextMessage textMessage = new TextMessage("return text" + linetext);
 	        	List<TextMessage> textMessage = zg.getLineTextMessage();

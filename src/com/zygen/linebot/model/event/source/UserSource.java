@@ -32,10 +32,10 @@ public class UserSource implements Source {
         this.userId = userId;
     }
 
-    @Override
+/*    @Override
     public String getSenderId() {
         return userId;
-    }
+    }*/
     @Override
     public String getUserId(){
     	return userId;

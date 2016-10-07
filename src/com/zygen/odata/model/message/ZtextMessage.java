@@ -12,11 +12,11 @@ public class ZtextMessage implements Message {
 		this.IvString = str;
 		
 	}
-	public ZtextMessage(String str){
+/*	public ZtextMessage(String str){
 		this.Ivchannel = "1472660011";
 		this.IvLmid = "07fbfe1943d58b1d0e5257c04f9b203551aa7077f62429228057b45e3cc37e57e4";
 		this.IvString = str;
-	}	
+	}	*/
 	@Override
 	public String getId() {
 		// TODO Auto-generated method stub

@@ -9,9 +9,9 @@ import com.zygen.linebot.model.event.source.Source;
 
 
 @JsonSubTypes({
-        @JsonSubTypes.Type(MessageEvent.class)
+        @JsonSubTypes.Type(MessageEvent.class),
        // @JsonSubTypes.Type(UnfollowEvent.class),
-       // @JsonSubTypes.Type(FollowEvent.class),
+       @JsonSubTypes.Type(FollowEvent.class)
        // @JsonSubTypes.Type(JoinEvent.class),
        // @JsonSubTypes.Type(LeaveEvent.class),
        // @JsonSubTypes.Type(PostbackEvent.class),
