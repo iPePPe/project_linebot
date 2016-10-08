@@ -19,6 +19,7 @@ package com.zygen.linebot.model;
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.zygen.linebot.model.message.Message;
 
 import lombok.AllArgsConstructor;
@@ -27,11 +28,16 @@ import lombok.Value;
 @Value
 @AllArgsConstructor
 public class PushMessage {
-    private final String to;
-    private final List<Message> messages;
+    private final @JsonProperty String to;
+    private final @JsonProperty List<Message> messages;
 
     public PushMessage(String to, Message message) {
         this.to = to;
         this.messages = Collections.singletonList(message);
     }
+	public PushMessage(String to,List<Message> message) {
+		this.to = to;
+		this.messages = message;
+
+	}
 }

@@ -3,6 +3,7 @@ package com.zygen.linebot.client;
 
 
 
+import com.zygen.linebot.model.PushMessage;
 import com.zygen.linebot.model.ReplyMessage;
 import com.zygen.linebot.model.response.BotApiResponse;
 
@@ -17,6 +18,8 @@ import retrofit2.http.POST;
 public interface LineMessagingService {
     @POST("/v2/bot/message/reply")
     Call<BotApiResponse> replyMessage(@Body ReplyMessage replyMessage);
+    @POST("/v2/bot/message/push")
+    Call<BotApiResponse> pushMessage(@Body PushMessage pushMessage);
 
 
 }

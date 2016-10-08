@@ -113,11 +113,29 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-
+		<dependency>
+			<groupId>org.eclipse.persistence</groupId>
+			<artifactId>eclipselink</artifactId>
+			<version>2.5.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.persistence</groupId>
+			<artifactId>javax.persistence</artifactId>
+			<version>2.0.0</version>
+			<scope>compile</scope>
+		</dependency>
 
 
 	</dependencies>
-	<modules>
-		<module>LineBOT-jpa</module>
-	</modules>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>LineBOT</groupId>
+				<artifactId>LineBOT</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 </project>
