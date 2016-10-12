@@ -41,10 +41,7 @@ import org.apache.olingo.odata2.api.processor.ODataResponse;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-//import javax.net.ssl.KeyManagerFactory;
-//import javax.net.ssl.SSLContext;
-//import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManagerFactory;
+
 
 import com.sap.core.connectivity.api.configuration.ConnectivityConfiguration;
 import com.sap.core.connectivity.api.configuration.DestinationConfiguration;
@@ -73,6 +70,7 @@ public class ZyGenMessageBuilder {
 	public static String usedFormat;
 	public static String entitySetName;
 	public static String oid;
+	public static String extend;
 
 	public ZyGenMessageBuilder() {
 		// TODO Auto-generated constructor stub
@@ -91,6 +89,13 @@ public class ZyGenMessageBuilder {
 		entitySetName = entityname;
 		usedFormat = APPLICATION_JSON;
 		oid = id;
+	}
+	public ZyGenMessageBuilder(String entityname, String id,String ext) {
+
+		entitySetName = entityname;
+		usedFormat = APPLICATION_JSON;
+		oid = id;
+		extend = ext;
 	}
 	private static String getUrlFromDestination(String destination){
 		Context ctx;
@@ -111,32 +116,34 @@ public class ZyGenMessageBuilder {
 
 	}
 	public static void main(String[] paras) throws Exception {
-		String url = getUrlFromDestination(DESTINATION);
+		String url = "http://zygenplay.com:8082/sap/opu/odata/ZGL01/ZGL02_SRV";
 		ZyGenMessageBuilder app = new ZyGenMessageBuilder(url,
-				"ZGFMLGW1Set",
-				"IvLmid='07fbfe1943d58b1d0e5257c04f9b203551aa7077f62429228057b45e3cc37e57e4',IvChannel='1472660011',IvString='bd-pe'",
+				"ZGFMLGW2HCollection",
+				"IvChannel='1472660011',IvInput='fioriurl',IvUid='27ffa61f11828d1d5f03029348932e6251fb2470f3222877d453e05d3bc57902e7'",
 				APPLICATION_JSON);
 
 		// print("\n----- Read Edm ------------------------------");
-		// Edm edm = app.readEdm(serviceUrl);
-		// print("Read default EntityContainer: " +
-		// edm.getDefaultEntityContainer().getName());
+		 Edm edm = app.readEdm(serviceUrl);
+		 print("Read default EntityContainer: " +
+		 edm.getDefaultEntityContainer().getName());
 
-		// print("\n----- Read Entry ------------------------------");
-		// ODataEntry entry = app.readEntry(edm, serviceUrl, usedFormat,
-		// entitySetName , oid);
-		// entry.getProperties()
-		// print(toJson(entry));
+		 print("\n----- Read Entry ------------------------------");
+		 ODataEntry entry = app.readEntry(edm, serviceUrl, usedFormat,
+		entitySetName , oid,"HeaderToDetailNav");
+		//entry.getProperties().
+		 Map<String, Object> values = new HashMap<String, Object>();
+		
+		 print(toJson(entry));
 		// entry.get
-		List<TextMessage> text = app.getLineTextMessage();
-		System.out.println(text.toString());
+		//List<TextMessage> text = app.getLineTextMessage();
+		//System.out.println(text.toString());
 	}
 
 	public List<TextMessage> getLineTextMessage() throws Exception {
 		List<TextMessage> text = new ArrayList<TextMessage>();
 		List<String> rets = new ArrayList<String>();
 		Edm edm = this.readEdm(getUrlFromDestination(DESTINATION));
-		ODataEntry entry = readEntry(edm, getUrlFromDestination(DESTINATION), usedFormat, entitySetName, oid);
+		ODataEntry entry = readEntry(edm, getUrlFromDestination(DESTINATION), usedFormat, entitySetName, oid,extend);
 		Map<String, Object> properties = entry.getProperties();
 		Set<Entry<String, Object>> entries = properties.entrySet();
 		for (Entry<String, Object> ent : entries) {
@@ -146,15 +153,10 @@ public class ZyGenMessageBuilder {
 					// System.out.println(arrJavaTechnologies.get(i));
 					text.add(new TextMessage(rets.get(i)));
 				}
-				// rets.forEach(ret -> text.add(new TextMessage((String)
-				// ent.getValue())));
-				// TextMessage textLine = new TextMessage((String)
-				// ent.getValue());
-				// text.add(textLine);
 			}
 		}
 		return text;
-	};
+	}
 
 	public static List<String> splitEqually(String text, int size) {
 		// Give the list the right capacity to start with. You could use an
@@ -499,4 +501,5 @@ public class ZyGenMessageBuilder {
 		}
 		
 	}
+	
 }

@@ -17,13 +17,14 @@ import javax.servlet.http.HttpServletResponse;
 import com.sap.core.connectivity.api.configuration.ConnectivityConfiguration;
 import com.sap.core.connectivity.api.configuration.DestinationConfiguration;
 import com.zygen.linebot.callback.CallBackServlet;
+import com.zygen.linebot.client.DestinationUtil;
 import com.zygen.linebot.client.LineMessagingServiceBuilder;
 import com.zygen.linebot.model.PushMessage;
 import com.zygen.linebot.model.message.Message;
 import com.zygen.linebot.model.message.TextMessage;
 import com.zygen.linebot.model.response.BotApiResponse;
 import com.zygen.odata.client.ZyGenMessageBuilder;
-import com.zygen.odata.model.message.ZtextMessage;
+import com.zygen.odata.model.message.ZtextMessageV2;
 
 import retrofit2.Response;
 
@@ -37,8 +38,8 @@ public class ActivationServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private Context context;
 	private static final String lineapi = "line-api";
-	private static ConnectivityConfiguration connectConfig;
-	private static DestinationConfiguration destinationConfig;
+	private static final DestinationUtil dest = new DestinationUtil(lineapi);
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(ActivationServlet.class);
 
 	/**
@@ -47,14 +48,7 @@ public class ActivationServlet extends HttpServlet {
 	public ActivationServlet() {
 		super();
 		// TODO Auto-generated constructor stub
-		this.context = this.initialContext();
-		try {
-			connectConfig = this.initialConnectivityConfigulation(context);
-			destinationConfig = getDestinationConfiguration();
-		} catch (NamingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
 
 	}
 
@@ -80,24 +74,24 @@ public class ActivationServlet extends HttpServlet {
 
 
 		String channelId = request.getParameter("IvChannel");
-		String userId = request.getParameter("IvLmid");
-		String iVString = request.getParameter("IvString");
+		String userId = request.getParameter("IvUid");
+		String iVString = request.getParameter("IvInput");
 		if (channelId.isEmpty() || userId.isEmpty() || iVString.isEmpty()) {
 			response.getWriter().println("channelId = " + channelId);
 			response.getWriter().println("userId = " + userId);
 			response.getWriter().println("iVString = " + iVString);
 			LOGGER.error("Parameter Error");
 		} else {
-			ZtextMessage ztext = new ZtextMessage(channelId, userId, iVString);
-			ZyGenMessageBuilder zg = new ZyGenMessageBuilder("ZGFMLGW1Set", ztext.getId());
+			ZtextMessageV2 ztext = new ZtextMessageV2(channelId,iVString, userId );
+			ZyGenMessageBuilder zg = new ZyGenMessageBuilder("ZGFMLGW2HCollection", ztext.getId(),"HeaderToDetailNav");
 			List<TextMessage> textMessage;
 			try {
 				textMessage = zg.getLineTextMessage();
-
+				response.getWriter().print((textMessage.get(0)).getText());
 				PushMessage pushMessage = new PushMessage(userId, (List<Message>) (Object) textMessage);
 
-				Response<BotApiResponse> res = LineMessagingServiceBuilder.create(getChannelAccessToken(lineapi))
-						.apiEndPoint(getUrlFromDestination(lineapi)).build().pushMessage(pushMessage).execute();
+				Response<BotApiResponse> res = LineMessagingServiceBuilder.create(dest.getChannelAccessToken())
+						.apiEndPoint(dest.getUrl()).build().pushMessage(pushMessage).execute();
 				if (res.code() != 200) {
 					String error = this.readStream(res.errorBody().byteStream());
 					LOGGER.debug("BODY: " + error);
@@ -136,42 +130,6 @@ public class ActivationServlet extends HttpServlet {
 		doGet(request, response);
 	}
 
-	private Context initialContext() {
-		Context ctx = null;
-		try {
-			return ctx = new InitialContext();
-		} catch (NamingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return ctx;
-	}
 
-	private ConnectivityConfiguration initialConnectivityConfigulation(Context cont) throws NamingException {
-		ConnectivityConfiguration configuration = (ConnectivityConfiguration) context
-				.lookup("java:comp/env/connectivityConfiguration");
-		// get destination configuration for "myDestinationName"
-
-		return configuration;
-	}
-
-	private DestinationConfiguration getDestinationConfiguration() {
-
-		return connectConfig.getConfiguration(lineapi);
-	}
-
-	private static String getUrlFromDestination(String destination) throws NamingException {
-
-		// DestinationConfiguration destConfiguration =
-		// connectConfig.getConfiguration(destination);
-		return destinationConfig.getProperty("URL");
-
-	}
-
-	private static String getChannelAccessToken(String destination) {
-
-		return destinationConfig.getProperty("ChannelAccessToken");
-
-	}
 
 }

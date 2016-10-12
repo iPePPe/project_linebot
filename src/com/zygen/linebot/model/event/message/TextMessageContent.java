@@ -26,14 +26,17 @@ import lombok.Value;
 @JsonTypeName("text")
 public class TextMessageContent implements MessageContent {
     private final String id;
+    private final String type;
     private final String text;
 
 
     @JsonCreator
     public TextMessageContent(
             @JsonProperty("id") String id,
+            @JsonProperty("typ") String type,
             @JsonProperty("text") String text) {
         this.id = id;
+        this.type = type;
         this.text = text;
         
     }
@@ -43,5 +46,8 @@ public class TextMessageContent implements MessageContent {
     }
     public String getText(){
     	return this.text;
+    }
+    public String getType(){
+    	return this.type;
     }
 }
