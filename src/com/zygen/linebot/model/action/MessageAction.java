@@ -14,23 +14,33 @@
  * under the License.
  */
 
-package com.zygen.linebot.model.message;
+package com.zygen.linebot.model.action;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-@JsonTypeName("text")
-public class TextMessage implements Message {
-    private final @JsonProperty String text ;
-    public TextMessage(){
-    	text = "";
-    }
-    public TextMessage(String text){
-    	this.text = text;
-    }
-	public String getText() {
-		return text;
-	}
-    
-}
+import lombok.Value;
 
+@Value
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonTypeName("message")
+public class MessageAction implements Action {
+    private final String label;
+    private final String text;
+
+    @JsonCreator
+    public MessageAction(
+            @JsonProperty("label") String label,
+            @JsonProperty("text") String text) {
+        this.label = label;
+        this.text = text;
+    }
+
+	@Override
+	public String getLabel() {
+		// TODO Auto-generated method stub
+		return this.label;
+	}
+}

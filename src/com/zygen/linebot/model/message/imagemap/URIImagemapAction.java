@@ -14,23 +14,28 @@
  * under the License.
  */
 
-package com.zygen.linebot.model.message;
+package com.zygen.linebot.model.message.imagemap;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-@JsonTypeName("text")
-public class TextMessage implements Message {
-    private final @JsonProperty String text ;
-    public TextMessage(){
-    	text = "";
-    }
-    public TextMessage(String text){
-    	this.text = text;
-    }
-	public String getText() {
-		return text;
-	}
-    
-}
+import lombok.Value;
 
+@Value
+@JsonTypeName("uri")
+public class URIImagemapAction implements ImagemapAction {
+    private final String linkUri;
+    private final ImagemapArea area;
+
+    public URIImagemapAction(@JsonProperty("linkUri") String linkUri,
+                             @JsonProperty("area") ImagemapArea area) {
+        this.linkUri = linkUri;
+        this.area = area;
+    }
+
+	@Override
+	public ImagemapArea getArea() {
+		// TODO Auto-generated method stub
+		return this.area;
+	}
+}

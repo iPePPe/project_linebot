@@ -14,23 +14,23 @@
  * under the License.
  */
 
-package com.zygen.linebot.model.message;
+package com.zygen.linebot.model.message.template;
 
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-@JsonTypeName("text")
-public class TextMessage implements Message {
-    private final @JsonProperty String text ;
-    public TextMessage(){
-    	text = "";
-    }
-    public TextMessage(String text){
-    	this.text = text;
-    }
-	public String getText() {
-		return text;
-	}
-    
-}
+import lombok.Value;
 
+@Value
+@JsonTypeName("carousel")
+public class CarouselTemplate implements Template {
+    private final List<CarouselColumn> columns;
+
+    @JsonCreator
+    public CarouselTemplate(@JsonProperty("columns") List<CarouselColumn> columns) {
+        this.columns = columns;
+    }
+}

@@ -16,21 +16,21 @@
 
 package com.zygen.linebot.model.message;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-@JsonTypeName("text")
-public class TextMessage implements Message {
-    private final @JsonProperty String text ;
-    public TextMessage(){
-    	text = "";
-    }
-    public TextMessage(String text){
-    	this.text = text;
-    }
-	public String getText() {
-		return text;
-	}
-    
-}
+import lombok.Value;
 
+@Value
+@JsonTypeName("location")
+public class LocationMessage implements Message {
+    private final String title;
+    private final String address;
+    private final double latitude;
+    private final double longitude;
+    public LocationMessage(String title,String address,double latitude,double longitude){
+    	this.title = title;
+    	this.address = address;
+    	this.latitude = latitude;
+    	this.longitude = longitude;
+    }
+}

@@ -16,21 +16,17 @@
 
 package com.zygen.linebot.model.message;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-@JsonTypeName("text")
-public class TextMessage implements Message {
-    private final @JsonProperty String text ;
-    public TextMessage(){
-    	text = "";
-    }
-    public TextMessage(String text){
-    	this.text = text;
-    }
-	public String getText() {
-		return text;
-	}
-    
-}
+import lombok.Value;
 
+@Value
+@JsonTypeName("image")
+public class ImageMessage implements Message {
+    private final String originalContentUrl;
+    private final String previewImageUrl;
+    public ImageMessage(String originalContentUrl,String previewImageUrl){
+    	this.originalContentUrl = originalContentUrl;
+    	this.previewImageUrl = previewImageUrl;
+    }
+}

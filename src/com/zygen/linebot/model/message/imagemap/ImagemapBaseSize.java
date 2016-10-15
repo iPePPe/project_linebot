@@ -14,23 +14,16 @@
  * under the License.
  */
 
-package com.zygen.linebot.model.message;
+package com.zygen.linebot.model.message.imagemap;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import lombok.Value;
 
-@JsonTypeName("text")
-public class TextMessage implements Message {
-    private final @JsonProperty String text ;
-    public TextMessage(){
-    	text = "";
+@Value
+public class ImagemapBaseSize {
+    private final int height;
+    private final int width;
+    public ImagemapBaseSize(int height,int width){
+    	this.height = height;
+    	this.width = width;
     }
-    public TextMessage(String text){
-    	this.text = text;
-    }
-	public String getText() {
-		return text;
-	}
-    
 }
-

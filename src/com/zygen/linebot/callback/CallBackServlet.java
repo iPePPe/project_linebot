@@ -39,6 +39,7 @@ import com.zygen.linebot.model.event.source.UserSource;
 import com.zygen.linebot.model.message.Message;
 import com.zygen.linebot.model.message.TextMessage;
 import com.zygen.linebot.model.response.BotApiResponse;
+import com.zygen.odata.client.ODataMessageBuilder;
 import com.zygen.odata.client.ZyGenMessageBuilder;
 import com.zygen.odata.model.message.ZtextMessageV2;
 import com.zygen.linebot.model.ReplyMessage;
@@ -90,6 +91,8 @@ public class CallBackServlet extends HttpServlet {
 		try {
 
 			emf = this.getEntityManagerFactory();
+			ctx = new InitialContext();
+			ds = (DataSource) ctx.lookup("java:comp/env/jdbc/DefaultDB");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -100,8 +103,8 @@ public class CallBackServlet extends HttpServlet {
 	private EntityManagerFactory getEntityManagerFactory() throws Exception {
 		try {
 
-			ctx = new InitialContext();
-			ds = (DataSource) ctx.lookup("java:comp/env/jdbc/DefaultDB");
+			
+			
 			Map<String, Object> properties = new HashMap<String, Object>();
 			properties.put(PersistenceUnitProperties.NON_JTA_DATASOURCE, ds);
 			properties.put(PersistenceUnitProperties.CACHE_SHARED_, true);
@@ -122,7 +125,7 @@ public class CallBackServlet extends HttpServlet {
 		// TODO Auto-generated method stub
 		try {
 			ctx = new InitialContext();
-			response.getWriter().print("PePPe Onlines...." + this.getCurrentTenantId());
+			response.getWriter().print("PePPe Onlines.3..." + this.getCurrentTenantId());
 		} catch (NamingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -137,6 +140,7 @@ public class CallBackServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		try {
+			//response.getWriter().println("parser");
 			doParser(request, response);
 		} catch (Exception e) {
 			response.getWriter().println("parser error: " + e.getMessage());
@@ -168,7 +172,7 @@ public class CallBackServlet extends HttpServlet {
 			} else {
 				final List<Event> result = callbackRequest.getEvents();
 				final MessageEvent messageEvent = (MessageEvent) result.get(0);
-				addMessageEventToDB(messageEvent);
+				//addMessageEventToDB(messageEvent);
 				replyToken = messageEvent.getReplyToken();
 				final UserSource source = (UserSource) messageEvent.getSource();
 				final String userId = source.getUserId();
@@ -176,11 +180,12 @@ public class CallBackServlet extends HttpServlet {
 				String linetext = text.getText();
 
 				ZtextMessageV2 ztext = new ZtextMessageV2(channelId,  linetext, userId);
-				ZyGenMessageBuilder zg = new ZyGenMessageBuilder("ZGFMLGW2HCollection", ztext.getId(),"HeaderToDetailNav");
-				List<TextMessage> textMessage = zg.getLineTextMessage();
-				if (textMessage.size() > 0) {
-					
-					replyLine(textMessage, messageEvent.getReplyToken());
+				ODataMessageBuilder odata = new ODataMessageBuilder("ZGFMLGW2HCollection", ztext.getId(),"HeaderToDetailNav");
+				//List<TextMessage> textMessage = odata.getLineTextMessage();
+				List<Message> msg = odata.getMessage();
+				if (msg.size() > 0) {
+				//	replyLine(textMessage, replyToken);
+					replyMessageLine(msg, messageEvent.getReplyToken());
 				} else {
 					replyLine(new TextMessage("I don't know"), replyToken);
 				}
@@ -255,7 +260,23 @@ public class CallBackServlet extends HttpServlet {
 			e.printStackTrace();
 		}
 	}
+	private void replyMessageLine(List<Message> message, String replyToken) {
 
+		ReplyMessage replyMessage = new ReplyMessage(replyToken, message);
+
+		Response<BotApiResponse> res;
+		try {
+			res = LineMessagingServiceBuilder.create(dest.getChannelAccessToken()).build().replyMessage(replyMessage)
+					.execute();
+			if (res.code() != 200) {
+				String error = this.readStream(res.errorBody().byteStream());
+				LOGGER.error("BODY: " + error);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	private String readStream(InputStream stream) throws Exception {
 		StringBuilder builder = new StringBuilder();
 		try (BufferedReader in = new BufferedReader(new InputStreamReader(stream))) {

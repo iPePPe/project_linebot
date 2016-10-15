@@ -34,7 +34,7 @@ public class ReplyMessage {
 		this.messages = message;
 
 	}
-
+	
 /*	public String toJSON(boolean prettyPrint) throws JsonGenerationException, JsonMappingException, IOException {
 		String json = null;
 		ObjectMapper mapper = new ObjectMapper(); // Setup Jackson

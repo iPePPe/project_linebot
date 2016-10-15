@@ -16,21 +16,28 @@
 
 package com.zygen.linebot.model.message;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.zygen.linebot.model.message.imagemap.ImagemapAction;
+import com.zygen.linebot.model.message.imagemap.ImagemapBaseSize;
 
-@JsonTypeName("text")
-public class TextMessage implements Message {
-    private final @JsonProperty String text ;
-    public TextMessage(){
-    	text = "";
-    }
-    public TextMessage(String text){
-    	this.text = text;
-    }
-	public String getText() {
-		return text;
+import lombok.Value;
+
+@Value
+@JsonTypeName("imagemap")
+public class ImagemapMessage implements Message {
+	private final String baseUrl;
+	private final String altText;
+	private final ImagemapBaseSize baseSize;
+	private final List<ImagemapAction> actions;
+
+	public ImagemapMessage(String baseUrl,String altText,ImagemapBaseSize baseSize,
+						   List<ImagemapAction> actions)
+	{
+		this.baseUrl = baseUrl;
+		this.altText = altText;
+		this.baseSize = baseSize;
+		this.actions = actions;
 	}
-    
 }
-

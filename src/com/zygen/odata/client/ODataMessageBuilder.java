@@ -45,9 +45,10 @@ import javax.naming.NamingException;
 import com.sap.core.connectivity.api.configuration.ConnectivityConfiguration;
 import com.sap.core.connectivity.api.configuration.DestinationConfiguration;
 import com.zygen.linebot.model.message.Message;
+import com.zygen.linebot.model.message.StickerMessage;
 import com.zygen.linebot.model.message.TextMessage;
 
-public class ZyGenMessageBuilder {
+public class ODataMessageBuilder {
 	public static final String HTTP_METHOD_PUT = "PUT";
 	public static final String HTTP_METHOD_POST = "POST";
 	public static final String HTTP_METHOD_GET = "GET";
@@ -72,19 +73,20 @@ public class ZyGenMessageBuilder {
 	public static String oid;
 	public static String extend;
 	public static int statusCode;
+	public List<Message> message = new ArrayList<Message>();;
 
-	public ZyGenMessageBuilder() {
+	public ODataMessageBuilder() {
 		// TODO Auto-generated constructor stub
 	}
 
-	public ZyGenMessageBuilder(String url, String entityname, String id, String format) {
+	public ODataMessageBuilder(String url, String entityname, String id, String format) {
 		serviceUrl = url;
 		entitySetName = entityname;
 		usedFormat = format;
 		oid = id;
 	}
 
-	public ZyGenMessageBuilder(String entityname, String id) {
+	public ODataMessageBuilder(String entityname, String id) {
 		// serviceUrl =
 		// "http://zygenplay.com:8082/sap/opu/odata/ZGL01/ZGL01_SRV";
 		// serviceUrl = getUrlFromDestination(DESTINATION);
@@ -93,7 +95,7 @@ public class ZyGenMessageBuilder {
 		oid = id;
 	}
 
-	public ZyGenMessageBuilder(String entityname, String id, String ext) {
+	public ODataMessageBuilder(String entityname, String id, String ext) {
 
 		entitySetName = entityname;
 		usedFormat = APPLICATION_JSON;
@@ -122,8 +124,8 @@ public class ZyGenMessageBuilder {
 
 	public static void main(String[] paras) throws Exception {
 		String url = "http://zygenplay.com:8082/sap/opu/odata/ZGL01/ZGL02_SRV";
-		ZyGenMessageBuilder app = new ZyGenMessageBuilder(url, "ZGFMLGW2HCollection",
-				"IvChannel='1472660011',IvInput='bd-pe',IvUid='27ffa61f11828d1d5f03029348932e6251fb2470f3222877d453e05d3bc57902e7'",
+		ODataMessageBuilder app = new ODataMessageBuilder(url, "ZGFMLGW2HCollection",
+				"IvChannel='1472660011',IvInput='fioriurl',IvUid='27ffa61f11828d1d5f03029348932e6251fb2470f3222877d453e05d3bc57902e7'",
 				APPLICATION_JSON);
 
 		// print("\n----- Read Edm ------------------------------");
@@ -141,6 +143,25 @@ public class ZyGenMessageBuilder {
 		EdmEntitySet entitySet = entityContainer.getEntitySet(entitySetName);
 		entry = EntityProvider.readEntry(usedFormat, entitySet, is, EntityProviderReadProperties.init().build());
 		app.parseData(entry);
+		
+
+	}
+
+	public List<Message> getMessage() {
+		Edm edm;
+		try {
+			edm = this.readEdm(getUrlFromDestination(DESTINATION));
+
+			ODataEntry entry = readEntry(edm, getUrlFromDestination(DESTINATION), usedFormat, entitySetName, oid, extend);
+			parseData(entry);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ODataException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return message;
 
 	}
 
@@ -148,24 +169,26 @@ public class ZyGenMessageBuilder {
 		Set<Entry<String, Object>> entries = entry.getProperties().entrySet();
 		for (Entry<String, Object> entry1 : entries) {
 			Object value = entry1.getValue();
-			String key   = entry1.getKey();
-			System.out.println("Key="+key);
+			// String key = entry1.getKey();
+			// System.out.println("Key=" + key);
 			if (value instanceof String) {
-				
-				String text = value == null ? "null" : value.toString();
-				System.out.println("Value=" + text);
+
+				// String text = value == null ? "null" : value.toString();
+				// System.out.println("Value=" + text);
 			} else if (value instanceof ODataDeltaFeed) {
+				// System.out.println("ODT");
 				ODataDeltaFeed feed = (ODataDeltaFeed) value;
 				List<ODataEntry> inlineEntries = feed.getEntries();
+				// System.out.println(inlineEntries.size());
+				for (int i = 0; i < inlineEntries.size(); i++) {
+					buildMessage(inlineEntries.get(i).getProperties());
 
-				for (ODataEntry oDataEntry : inlineEntries) {
-					handleEntry((Map<String, Object>) oDataEntry.getProperties());
 				}
+
 			} else if (entry1.getValue() instanceof Calendar) {
 				Calendar cal = (Calendar) entry1.getValue();
 				value = SimpleDateFormat.getInstance().format(cal.getTime());
-			}
-			else {
+			} else {
 				handleEntry((Map<String, Object>) value);
 			}
 		}
@@ -176,7 +199,7 @@ public class ZyGenMessageBuilder {
 		for (Entry<String, Object> entry : entries) {
 			Object value = entry.getValue();
 			String key = entry.getKey();
-			System.out.println("Key:"+key);
+			System.out.println("Key:" + key);
 			if (value instanceof Map) {
 				System.out.println("Map");
 				handleEntry((Map<String, Object>) value);
@@ -206,6 +229,23 @@ public class ZyGenMessageBuilder {
 				}
 			}
 		}
+	}
+
+	private void buildMessage(Map<String, Object> properties) {
+
+		//List<Message> msg = new ArrayList<Message>();
+		String type = (String) properties.get("Type");
+		if (type.equals("text")) {
+			TextMessage textMessage = new TextMessage((String) properties.get("F1"));
+			message.add(textMessage);
+
+		} else if (type.equals("sticker")) {
+			StickerMessage sticker = new StickerMessage((String) properties.get("F1"), (String) properties.get("F2"));
+			message.add((Message) sticker);
+
+		}
+
+
 	}
 
 	public List<TextMessage> getLineTextMessage() throws Exception {

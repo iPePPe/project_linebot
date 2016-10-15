@@ -14,23 +14,23 @@
  * under the License.
  */
 
-package com.zygen.linebot.model.message;
+package com.zygen.linebot.model.action;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 
-@JsonTypeName("text")
-public class TextMessage implements Message {
-    private final @JsonProperty String text ;
-    public TextMessage(){
-    	text = "";
-    }
-    public TextMessage(String text){
-    	this.text = text;
-    }
-	public String getText() {
-		return text;
-	}
-    
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = As.PROPERTY,
+        property = "type",
+        visible = true
+)
+@JsonSubTypes({
+                      @JsonSubTypes.Type(PostbackAction.class),
+                      @JsonSubTypes.Type(URIAction.class),
+                      @JsonSubTypes.Type(MessageAction.class)
+              })
+public interface Action {
+    String getLabel();
 }
-
