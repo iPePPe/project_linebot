@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.sap.cloud.account.TenantContext;
 import com.sap.core.connectivity.api.configuration.ConnectivityConfiguration;
 import com.sap.core.connectivity.api.configuration.DestinationConfiguration;
 import com.zygen.linebot.callback.CallBackServlet;
@@ -23,13 +24,17 @@ import com.zygen.linebot.model.PushMessage;
 import com.zygen.linebot.model.message.Message;
 import com.zygen.linebot.model.message.TextMessage;
 import com.zygen.linebot.model.response.BotApiResponse;
-import com.zygen.odata.client.ZyGenMessageBuilder;
+import com.zygen.odata.client.ODataMessageBuilder;
 import com.zygen.odata.model.message.ZtextMessageV2;
 
 import retrofit2.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.security.auth.login.LoginContext;
+import javax.security.auth.login.LoginException;
+import com.sap.security.auth.login.LoginContextFactory;
 
 /**
  * Servlet implementation class ActivationServlet
@@ -39,7 +44,7 @@ public class ActivationServlet extends HttpServlet {
 	private Context context;
 	private static final String lineapi = "line-api";
 	private static final DestinationUtil dest = new DestinationUtil(lineapi);
-
+	private InitialContext ctx;
 	private static final Logger LOGGER = LoggerFactory.getLogger(ActivationServlet.class);
 
 	/**
@@ -48,7 +53,6 @@ public class ActivationServlet extends HttpServlet {
 	public ActivationServlet() {
 		super();
 		// TODO Auto-generated constructor stub
-
 
 	}
 
@@ -59,31 +63,62 @@ public class ActivationServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		// TODO Auto-generated method stub
-
+		String user = request.getRemoteUser();
 		try {
-			doActivation(request, response);
-		} catch (Exception e) {
-			response.getWriter().println("parser error: " + e.getMessage());
-			LOGGER.error("Parser Error", e);
+			ctx = new InitialContext();
+		} catch (NamingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
+		if (user != null) {
+
+			try {
+				response.getWriter().println("Hello : " + user);
+				response.getWriter().println("Tenant ID : " + getCurrentTenantId());
+			} catch (NamingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			doActivation(request, response);
+		} else {
+			LoginContext loginContext;
+			try {
+				loginContext = LoginContextFactory.createLoginContext("FORM");
+				loginContext.login();
+				response.getWriter().println("Hello, " + request.getRemoteUser());
+
+			} catch (LoginException e) {
+				e.printStackTrace();
+			}
+		}
+		/*
+		 * try { doActivation(request, response); } catch (Exception e) {
+		 * response.getWriter().println("parser error: " + e.getMessage());
+		 * LOGGER.error("Parser Error", e); }
+		 */
 
 	}
 
 	private void doActivation(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		// TODO Auto-generated method stub
 
-
 		String channelId = request.getParameter("IvChannel");
 		String userId = request.getParameter("IvUid");
 		String iVString = request.getParameter("IvInput");
-		if (channelId.isEmpty() || userId.isEmpty() || iVString.isEmpty()) {
-			response.getWriter().println("channelId = " + channelId);
-			response.getWriter().println("userId = " + userId);
-			response.getWriter().println("iVString = " + iVString);
-			LOGGER.error("Parameter Error");
+		if (channelId == null || userId == null || iVString == null) {
+			// response.getWriter().println("channelId = " + channelId);
+			// response.getWriter().println("userId = " + userId);
+			// response.getWriter().println("iVString = " + iVString);
+			// LOGGER.error("Parameter Error");
+			try {
+				response.getWriter().println("Tenant ID : " + getCurrentTenantId());
+			} catch (NamingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		} else {
-			ZtextMessageV2 ztext = new ZtextMessageV2(channelId,iVString, userId );
-			ZyGenMessageBuilder zg = new ZyGenMessageBuilder("ZGFMLGW2HCollection", ztext.getId(),"HeaderToDetailNav");
+			ZtextMessageV2 ztext = new ZtextMessageV2(channelId, iVString, userId);
+			ODataMessageBuilder zg = new ODataMessageBuilder("ZGFMLGW2HCollection", ztext.getId(), "HeaderToDetailNav");
 			List<TextMessage> textMessage;
 			try {
 				textMessage = zg.getLineTextMessage();
@@ -94,11 +129,12 @@ public class ActivationServlet extends HttpServlet {
 						.apiEndPoint(dest.getUrl()).build().pushMessage(pushMessage).execute();
 				if (res.code() != 200) {
 					String error = this.readStream(res.errorBody().byteStream());
+					response.getWriter().println(error);
 					LOGGER.debug("BODY: " + error);
 				}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				response.getWriter().println("Parser error: " + e.getMessage());
+				response.getWriter().println("Accivation error: " + e.getMessage());
 				LOGGER.error("Parse error", e);
 
 			}
@@ -130,6 +166,21 @@ public class ActivationServlet extends HttpServlet {
 		doGet(request, response);
 	}
 
+	private String getCurrentTenantId() throws NamingException {
+		String currentTenantId = "";
+		// InitialContext ctx = new InitialContext();
+		try {
+			ctx = new InitialContext();
+			Context envCtx = (Context) ctx.lookup("java:comp/env");
+			TenantContext tenantContext = (TenantContext) envCtx.lookup("TenantContext");
 
+			currentTenantId = tenantContext.getTenant().getId();
+
+		} catch (NamingException e) {
+			return "NOT_CURRENTLY_RUNNING_MULTI_-_TENANT"; // 36 chars as per
+															// real tenant id
+		}
+		return currentTenantId;
+	}
 
 }

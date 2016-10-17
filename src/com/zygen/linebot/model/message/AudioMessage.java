@@ -16,6 +16,7 @@
 
 package com.zygen.linebot.model.message;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import lombok.Value;
@@ -23,8 +24,8 @@ import lombok.Value;
 @Value
 @JsonTypeName("audio")
 public class AudioMessage implements Message {
-    private final String originalContentUrl;
-    private final Integer duration;
+    private final @JsonProperty String originalContentUrl;
+    private final @JsonProperty Integer duration;
     public AudioMessage(String url,Integer du){
     	originalContentUrl = url;
     	duration = du;

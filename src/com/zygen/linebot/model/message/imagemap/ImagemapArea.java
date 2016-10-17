@@ -16,14 +16,16 @@
 
 package com.zygen.linebot.model.message.imagemap;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Value;
 
 @Value
 public class ImagemapArea {
-    private final int x;
-    private final int y;
-    private final int width;
-    private final int height;
+    private final @JsonProperty int x;
+    private final @JsonProperty int y;
+    private final @JsonProperty int width;
+    private final @JsonProperty int height;
     public ImagemapArea(int x, int y, int width,int height){
     	this.x = x;
     	this.y = y;

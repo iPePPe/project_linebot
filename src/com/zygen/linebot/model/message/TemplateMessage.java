@@ -16,6 +16,7 @@
 
 package com.zygen.linebot.model.message;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.zygen.linebot.model.message.template.Template;
 
@@ -24,8 +25,8 @@ import lombok.Value;
 @Value
 @JsonTypeName("template")
 public class TemplateMessage implements Message {
-    private final String altText;
-    private final Template template;
+    private final @JsonProperty String altText;
+    private final @JsonProperty Template template;
     public TemplateMessage(String altText,Template template){
     	this.altText = altText;
     	this.template = template;

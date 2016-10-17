@@ -16,6 +16,7 @@
 
 package com.zygen.linebot.model.message;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import lombok.Value;
@@ -23,10 +24,10 @@ import lombok.Value;
 @Value
 @JsonTypeName("location")
 public class LocationMessage implements Message {
-    private final String title;
-    private final String address;
-    private final double latitude;
-    private final double longitude;
+    private final @JsonProperty String title;
+    private final @JsonProperty String address;
+    private final @JsonProperty double latitude;
+    private final @JsonProperty double longitude;
     public LocationMessage(String title,String address,double latitude,double longitude){
     	this.title = title;
     	this.address = address;

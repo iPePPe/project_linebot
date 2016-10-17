@@ -29,10 +29,10 @@ import lombok.Value;
 @Value
 @JsonTypeName("buttons")
 public class ButtonsTemplate implements Template {
-    private final String thumbnailImageUrl;
-    private final String title;
-    private final String text;
-    private final List<Action> actions;
+    private final @JsonProperty String thumbnailImageUrl;
+    private final @JsonProperty String title;
+    private final @JsonProperty String text;
+    private final @JsonProperty List<Action> actions;
 
     @JsonCreator
     public ButtonsTemplate(

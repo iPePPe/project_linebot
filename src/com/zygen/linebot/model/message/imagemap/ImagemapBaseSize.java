@@ -16,12 +16,14 @@
 
 package com.zygen.linebot.model.message.imagemap;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Value;
 
 @Value
 public class ImagemapBaseSize {
-    private final int height;
-    private final int width;
+    private final @JsonProperty int height;
+    private final @JsonProperty int width;
     public ImagemapBaseSize(int height,int width){
     	this.height = height;
     	this.width = width;

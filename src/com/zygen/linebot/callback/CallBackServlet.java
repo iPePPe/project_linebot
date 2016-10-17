@@ -40,15 +40,12 @@ import com.zygen.linebot.model.message.Message;
 import com.zygen.linebot.model.message.TextMessage;
 import com.zygen.linebot.model.response.BotApiResponse;
 import com.zygen.odata.client.ODataMessageBuilder;
-import com.zygen.odata.client.ZyGenMessageBuilder;
 import com.zygen.odata.model.message.ZtextMessageV2;
 import com.zygen.linebot.model.ReplyMessage;
 import com.zygen.linebot.model.event.CallbackRequest;
 import com.zygen.linebot.client.DestinationUtil;
 import com.zygen.linebot.client.LineMessagingServiceBuilder;
 import com.zygen.linebot.client.LineSignatureValidator;
-
-
 
 import retrofit2.Response;
 
@@ -103,8 +100,6 @@ public class CallBackServlet extends HttpServlet {
 	private EntityManagerFactory getEntityManagerFactory() throws Exception {
 		try {
 
-			
-			
 			Map<String, Object> properties = new HashMap<String, Object>();
 			properties.put(PersistenceUnitProperties.NON_JTA_DATASOURCE, ds);
 			properties.put(PersistenceUnitProperties.CACHE_SHARED_, true);
@@ -125,7 +120,7 @@ public class CallBackServlet extends HttpServlet {
 		// TODO Auto-generated method stub
 		try {
 			ctx = new InitialContext();
-			response.getWriter().print("PePPe Onlines.3..." + this.getCurrentTenantId());
+			response.getWriter().print("PePPe Onlines1..." + this.getCurrentTenantId());
 		} catch (NamingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -140,7 +135,7 @@ public class CallBackServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		try {
-			//response.getWriter().println("parser");
+			// response.getWriter().println("parser");
 			doParser(request, response);
 		} catch (Exception e) {
 			response.getWriter().println("parser error: " + e.getMessage());
@@ -153,7 +148,7 @@ public class CallBackServlet extends HttpServlet {
 		// TODO Auto-generated method stub
 		String replyToken = null;
 		try {
-			// doAdd(request);
+
 			String channelId = request.getParameter("ch");
 			String signature = request.getHeader("X-Line-Signature");
 			if (signature == null || signature.length() == 0) {
@@ -172,22 +167,24 @@ public class CallBackServlet extends HttpServlet {
 			} else {
 				final List<Event> result = callbackRequest.getEvents();
 				final MessageEvent messageEvent = (MessageEvent) result.get(0);
-				//addMessageEventToDB(messageEvent);
 				replyToken = messageEvent.getReplyToken();
+				addMessageEventToDB(messageEvent);
+
 				final UserSource source = (UserSource) messageEvent.getSource();
 				final String userId = source.getUserId();
 				final TextMessageContent text = (TextMessageContent) messageEvent.getMessage();
 				String linetext = text.getText();
 
-				ZtextMessageV2 ztext = new ZtextMessageV2(channelId,  linetext, userId);
-				ODataMessageBuilder odata = new ODataMessageBuilder("ZGFMLGW2HCollection", ztext.getId(),"HeaderToDetailNav");
-				//List<TextMessage> textMessage = odata.getLineTextMessage();
+				ZtextMessageV2 ztext = new ZtextMessageV2(channelId, linetext, userId);
+				ODataMessageBuilder odata = new ODataMessageBuilder("ZGFMLGW2HCollection", ztext.getId(),
+						"HeaderToDetailNav");
+				// List<TextMessage> textMessage = odata.getLineTextMessage();
 				List<Message> msg = odata.getMessage();
 				if (msg.size() > 0) {
-				//	replyLine(textMessage, replyToken);
+					// replyLine(textMessage, replyToken);
 					replyMessageLine(msg, messageEvent.getReplyToken());
 				} else {
-					replyLine(new TextMessage("I don't know"), replyToken);
+					replyLine(new TextMessage("I don't know"), messageEvent.getReplyToken());
 				}
 
 			}
@@ -217,8 +214,9 @@ public class CallBackServlet extends HttpServlet {
 	}
 
 	public void addMessageEventToDB(MessageEvent messageEvent) throws Exception {
-		// emf = this.getEntityManagerFactory();
-		
+
+		emf = this.getEntityManagerFactory();
+
 		EntityManager em = emf.createEntityManager();
 		try {
 
@@ -233,6 +231,8 @@ public class CallBackServlet extends HttpServlet {
 			em.setProperty("me-tenant.id", this.getCurrentTenantId());
 			em.persist(me);
 			em.getTransaction().commit();
+		} catch (Exception e) {
+			LOGGER.error("DB Error " + e.getMessage());
 		} finally {
 			em.close();
 		}
@@ -260,6 +260,7 @@ public class CallBackServlet extends HttpServlet {
 			e.printStackTrace();
 		}
 	}
+
 	private void replyMessageLine(List<Message> message, String replyToken) {
 
 		ReplyMessage replyMessage = new ReplyMessage(replyToken, message);
@@ -277,6 +278,7 @@ public class CallBackServlet extends HttpServlet {
 			e.printStackTrace();
 		}
 	}
+
 	private String readStream(InputStream stream) throws Exception {
 		StringBuilder builder = new StringBuilder();
 		try (BufferedReader in = new BufferedReader(new InputStreamReader(stream))) {

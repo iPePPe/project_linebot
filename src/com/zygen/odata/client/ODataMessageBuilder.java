@@ -44,9 +44,13 @@ import javax.naming.NamingException;
 
 import com.sap.core.connectivity.api.configuration.ConnectivityConfiguration;
 import com.sap.core.connectivity.api.configuration.DestinationConfiguration;
+import com.zygen.linebot.model.message.AudioMessage;
+import com.zygen.linebot.model.message.ImageMessage;
+import com.zygen.linebot.model.message.LocationMessage;
 import com.zygen.linebot.model.message.Message;
 import com.zygen.linebot.model.message.StickerMessage;
 import com.zygen.linebot.model.message.TextMessage;
+import com.zygen.linebot.model.message.VideoMessage;
 
 public class ODataMessageBuilder {
 	public static final String HTTP_METHOD_PUT = "PUT";
@@ -243,7 +247,31 @@ public class ODataMessageBuilder {
 			StickerMessage sticker = new StickerMessage((String) properties.get("F1"), (String) properties.get("F2"));
 			message.add((Message) sticker);
 
+		}else if (type.equals("video")) {
+			VideoMessage video = new VideoMessage((String) properties.get("F1"), (String) properties.get("F2"));
+			message.add((Message)video);
+		}else if (type.equals("audio")) {
+			AudioMessage video = new AudioMessage((String) properties.get("F1"), 
+												  Integer.getInteger((String)properties.get("F2")) );
+			message.add((Message)video);
+		}else if (type.equals("imagemap")) {
+			TextMessage text = new TextMessage("Not yet support");
+			message.add((Message)text);
+		}else if (type.equals("image")) {
+			ImageMessage image = new ImageMessage((String) properties.get("F1"), 
+												  (String) properties.get("F2"));
+			message.add((Message)image);
+		}else if (type.equals("template")) {
+			TextMessage text = new TextMessage("Not yet support");
+			message.add((Message)text);
+		}else if (type.equals("location")) {
+			LocationMessage location = new LocationMessage((String) properties.get("F1"), 
+														   (String) properties.get("F2"), 
+														   Double.parseDouble((String)properties.get("F3")), 
+														   Double.parseDouble((String)properties.get("F4"))   );
+			message.add((Message)location);
 		}
+
 
 
 	}

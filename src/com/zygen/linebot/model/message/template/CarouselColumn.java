@@ -27,10 +27,10 @@ import lombok.Value;
 
 @Value
 public class CarouselColumn {
-    private final String thumbnailImageUrl;
-    private final String title;
-    private final String text;
-    private final List<Action> actions;
+    private final @JsonProperty String thumbnailImageUrl;
+    private final @JsonProperty String title;
+    private final @JsonProperty String text;
+    private final @JsonProperty List<Action> actions;
 
     @JsonCreator
     public CarouselColumn(

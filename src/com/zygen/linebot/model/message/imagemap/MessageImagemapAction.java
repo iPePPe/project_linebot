@@ -24,8 +24,8 @@ import lombok.Value;
 @Value
 @JsonTypeName("message")
 public class MessageImagemapAction implements ImagemapAction {
-    private final String text;
-    private final ImagemapArea area;
+    private final @JsonProperty String text;
+    private final @JsonProperty ImagemapArea area;
 
     public MessageImagemapAction(@JsonProperty("text") String text,
                                  @JsonProperty("area") ImagemapArea area) {
