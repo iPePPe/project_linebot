@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>LineBOT</groupId>
-	<artifactId>LineBOT</artifactId>
-	<version>0.0.2-BETA</version>
+	<groupId>NICE</groupId>
+	<artifactId>NICE</artifactId>
+	<version>0.0.1-BETA</version>
 	<packaging>pom</packaging>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
@@ -155,8 +155,8 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>LineBOT</groupId>
-				<artifactId>LineBOT</artifactId>
+				<groupId>NICE</groupId>
+				<artifactId>NICE</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 		</dependencies>
