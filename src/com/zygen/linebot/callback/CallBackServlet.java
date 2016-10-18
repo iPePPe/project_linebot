@@ -11,16 +11,11 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-//import javax.sql.DataSource;
 import javax.sql.DataSource;
-
-import org.eclipse.persistence.config.EntityManagerProperties;
-import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +38,7 @@ import com.zygen.odata.client.ODataMessageBuilder;
 import com.zygen.odata.model.message.ZtextMessageV2;
 import com.zygen.linebot.model.ReplyMessage;
 import com.zygen.linebot.model.event.CallbackRequest;
+import com.zygen.hcp.jpa.JPAEntityFactoryManager;
 import com.zygen.linebot.client.DestinationUtil;
 import com.zygen.linebot.client.LineMessagingServiceBuilder;
 import com.zygen.linebot.client.LineSignatureValidator;
@@ -50,13 +46,8 @@ import com.zygen.linebot.client.LineSignatureValidator;
 import retrofit2.Response;
 
 import java.sql.Date;
-
-//import com.zygen.linebot.callback.LineMessageDAO;
-//import com.zygen.linebot.model.message.TextMessage;
-
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
 
 /**
  * Servlet implementation class CallBackServletd
@@ -66,11 +57,12 @@ public class CallBackServlet extends HttpServlet {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CallBackServlet.class);
 	private final LineSignatureValidator lineSignatureValidator;
 	private final ObjectMapper objectMapper;
-
+	public static final String DATA_SOURCE_NAME = "java:comp/env/jdbc/DefaultDB";
+	public static final String PERSISTENCE_UNIT_NAME = "persistence-linebot";
 	private static final String lineapi = "line-api";
 	private static final DestinationUtil dest = new DestinationUtil(lineapi);
-	private InitialContext ctx;
-	private DataSource ds;
+//	private InitialContext ctx;
+
 	private EntityManagerFactory emf;
 
 	public CallBackServlet() {
@@ -88,8 +80,8 @@ public class CallBackServlet extends HttpServlet {
 		try {
 
 			emf = this.getEntityManagerFactory();
-			ctx = new InitialContext();
-			ds = (DataSource) ctx.lookup("java:comp/env/jdbc/DefaultDB");
+			
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -100,11 +92,8 @@ public class CallBackServlet extends HttpServlet {
 	private EntityManagerFactory getEntityManagerFactory() throws Exception {
 		try {
 
-			Map<String, Object> properties = new HashMap<String, Object>();
-			properties.put(PersistenceUnitProperties.NON_JTA_DATASOURCE, ds);
-			properties.put(PersistenceUnitProperties.CACHE_SHARED_, true);
-			properties.put("me-tenant.id", this.getCurrentTenantId());
-			emf = Persistence.createEntityManagerFactory("persistence-linebot", properties);
+			emf = JPAEntityFactoryManager.getEntityManagerFactory();
+
 		} catch (Exception e) {
 			throw new Exception(e);
 		}
@@ -119,8 +108,8 @@ public class CallBackServlet extends HttpServlet {
 			throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		try {
-			ctx = new InitialContext();
-			response.getWriter().print("PePPe Onlines1..." + this.getCurrentTenantId());
+
+			response.getWriter().print("PePPe OData2..." + this.getCurrentTenantId());
 		} catch (NamingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -178,10 +167,8 @@ public class CallBackServlet extends HttpServlet {
 				ZtextMessageV2 ztext = new ZtextMessageV2(channelId, linetext, userId);
 				ODataMessageBuilder odata = new ODataMessageBuilder("ZGFMLGW2HCollection", ztext.getId(),
 						"HeaderToDetailNav");
-				// List<TextMessage> textMessage = odata.getLineTextMessage();
 				List<Message> msg = odata.getMessage();
 				if (msg.size() > 0) {
-					// replyLine(textMessage, replyToken);
 					replyMessageLine(msg, messageEvent.getReplyToken());
 				} else {
 					replyLine(new TextMessage("I don't know"), messageEvent.getReplyToken());
@@ -198,9 +185,9 @@ public class CallBackServlet extends HttpServlet {
 
 	public String getCurrentTenantId() throws NamingException {
 		String currentTenantId = "";
-		// InitialContext ctx = new InitialContext();
+
 		try {
-			ctx = new InitialContext();
+			InitialContext ctx = new InitialContext();
 			Context envCtx = (Context) ctx.lookup("java:comp/env");
 			TenantContext tenantContext = (TenantContext) envCtx.lookup("TenantContext");
 
@@ -226,7 +213,6 @@ public class CallBackServlet extends HttpServlet {
 			me.setTimestamp(Date.from(messageEvent.getTimestamp()));
 			me.setType(((TextMessageContent) messageEvent.getMessage()).getType());
 			me.setUserId(messageEvent.getSource().getUserId());
-
 			em.getTransaction().begin();
 			em.setProperty("me-tenant.id", this.getCurrentTenantId());
 			em.persist(me);
