@@ -41,6 +41,7 @@ import com.zygen.linebot.model.ReplyMessage;
 import com.zygen.linebot.model.event.CallbackRequest;
 import com.zygen.hcp.jpa.JPAEntityFactoryManager;
 import com.zygen.hcp.jpa.UserProfile;
+import com.zygen.hcp.model.UserProfileModel;
 import com.zygen.linebot.client.DestinationUtil;
 import com.zygen.linebot.client.LineMessagingServiceBuilder;
 import com.zygen.linebot.client.LineSignatureValidator;
@@ -53,9 +54,9 @@ import java.util.List;
 /**
  * Servlet implementation class CallBackServletd
  */
-public class CallBackServlet extends HttpServlet {
+public class CallbackHCPServlet extends HttpServlet {
 	private static final long serialVersionUID = 102831973239L;
-	private static final Logger LOGGER = LoggerFactory.getLogger(CallBackServlet.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CallbackHCPServlet.class);
 	private final LineSignatureValidator lineSignatureValidator;
 	private final ObjectMapper objectMapper;
 	public static final String DATA_SOURCE_NAME = "java:comp/env/jdbc/DefaultDB";
@@ -66,7 +67,7 @@ public class CallBackServlet extends HttpServlet {
 
 	private EntityManagerFactory emf;
 
-	public CallBackServlet() {
+	public CallbackHCPServlet() {
 
 		this.lineSignatureValidator = new LineSignatureValidator(
 				dest.getChannelSecret().getBytes(StandardCharsets.UTF_8));
@@ -224,7 +225,12 @@ public class CallBackServlet extends HttpServlet {
 			 */
 			em.getTransaction().begin();
 			em.setProperty("me-tenant.id", this.getCurrentTenantId());
-			em.persist(me);
+			//em.persist(me);
+			//Query query = em.createQuery("SELECT s FROM USERPROFILE s WHERE s.USERID =" + messageEvent.getSource().getUserId());
+			UserProfileModel upm = new UserProfileModel();
+			em.persist(upm.checkCreateUserProfile(em, messageEvent.getSource().getUserId(),
+												  this.getCurrentTenantId(), 
+												  dest.getChannelAccessToken(),me));
 			em.getTransaction().commit();
 		} catch (Exception e) {
 			LOGGER.error("DB Error " + e.getMessage());

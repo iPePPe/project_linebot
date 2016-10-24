@@ -17,13 +17,16 @@ import org.apache.olingo.odata2.jpa.processor.api.exception.ODataJPARuntimeExcep
 import org.apache.olingo.odata2.jpa.processor.api.factory.ODataJPAAccessFactory;
 import org.apache.olingo.odata2.jpa.processor.api.factory.ODataJPAFactory;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sap.cloud.account.TenantContext;
 import com.zygen.hcp.jpa.JPAEntityFactoryManager;
+import com.zygen.linebot.callback.CallbackHCPServlet;
 
-public class MessageEventODataJPAServiceFactory extends ODataJPAServiceFactory {
+public class NiceODataJPAServiceFactory extends ODataJPAServiceFactory {
 	//private static final String PUNIT_NAME = "persistence-linebot";
-	
+	private static final Logger LOGGER = LoggerFactory.getLogger(NiceODataJPAServiceFactory.class);
 	@SuppressWarnings("null")
 	@Override
 	public ODataJPAContext initializeODataJPAContext() throws ODataJPARuntimeException {
@@ -37,15 +40,13 @@ public class MessageEventODataJPAServiceFactory extends ODataJPAServiceFactory {
 			Context envCtx = (Context) ctx.lookup(JPAEntityFactoryManager.COMP_ENV);
 			TenantContext tenantContext = (TenantContext) envCtx.lookup("TenantContext");
 			String currentTenantId = tenantContext.getTenant().getId();
-			DataSource ds = (DataSource)ctx.lookup(JPAEntityFactoryManager.DATA_SOURCE_NAME);
-			Map<String, Object> properties = new HashMap<String, Object>();
-			//properties.put(PersistenceUnitProperties.CACHE_SHARED_, false);
-			//properties.put(PersistenceUnitProperties.MULTITENANT_SHARED_EMF, false);
-			properties.put(PersistenceUnitProperties.NON_JTA_DATASOURCE, ds);
-			properties.put(JPAEntityFactoryManager.TENANT_ID, currentTenantId);
-			emf = Persistence.createEntityManagerFactory(JPAEntityFactoryManager.PERSISTENCE_UNIT_NAME, properties);
+			//DataSource ds = (DataSource)ctx.lookup(JPAEntityFactoryManager.DATA_SOURCE_NAME);
+			//Map<String, Object> properties = new HashMap<String, Object>();
+			//properties.put(PersistenceUnitProperties.NON_JTA_DATASOURCE, ds);
+			//properties.put(JPAEntityFactoryManager.TENANT_ID, currentTenantId);
+			//emf = Persistence.createEntityManagerFactory(JPAEntityFactoryManager.PERSISTENCE_UNIT_NAME, properties);
+			emf = JPAEntityFactoryManager.getEntityManagerFactory();
 			em = emf.createEntityManager();
-			//em.isOpen()
 			em.setProperty(JPAEntityFactoryManager.TENANT_ID, currentTenantId);
 			oDataJPAContext.setEntityManagerFactory(emf);
 			oDataJPAContext.setPersistenceUnitName(JPAEntityFactoryManager.PERSISTENCE_UNIT_NAME);
@@ -55,6 +56,7 @@ public class MessageEventODataJPAServiceFactory extends ODataJPAServiceFactory {
 		    
 		} catch (NamingException e) {
 			// TODO Auto-generated catch block
+			LOGGER.error(e.getMessage());
 			e.printStackTrace();
 		}
 		return oDataJPAContext;

@@ -72,13 +72,7 @@ public class ActivationServlet extends HttpServlet {
 		}
 		if (user != null) {
 
-			try {
-				response.getWriter().println("Hello : " + user);
-				response.getWriter().println("Tenant ID : " + getCurrentTenantId());
-			} catch (NamingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			response.getWriter().println("Hello : " + user);
 			doActivation(request, response);
 		} else {
 			LoginContext loginContext;

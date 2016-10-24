@@ -45,6 +45,17 @@
 	</servlet-mapping>
 	<servlet>
 		<description></description>
+		<display-name>CallbackHCPServlet</display-name>
+		<servlet-name>CallbackHCPServlet</servlet-name>
+		<servlet-class>com.zygen.linebot.callback.CallbackHCPServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CallbackHCPServlet</servlet-name>
+		<url-pattern>/CallbackHCPServlet</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<description></description>
 		<display-name>ActivationServlet</display-name>
 		<servlet-name>ActivationServlet</servlet-name>
 		<servlet-class>com.zygen.hcp.ui.ActivationServlet</servlet-class>
@@ -63,12 +74,12 @@
 		</init-param>
 		<init-param>
 			<param-name>org.apache.olingo.odata2.service.factory</param-name>
-			<param-value>com.zygen.hcp.jpa.odata.MessageEventODataJPAServiceFactory</param-value>
+			<param-value>com.zygen.hcp.jpa.odata.NiceODataJPAServiceFactory</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>ODataServlet</servlet-name>
-		<url-pattern>/MessageEvent.svc/*</url-pattern>
+		<url-pattern>/Nice.svc/*</url-pattern>
 	</servlet-mapping>
 </web-app>
