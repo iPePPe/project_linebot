@@ -27,6 +27,7 @@ public class Command implements Serializable {
 	private String langu;
 	private String description;
 	private String pattern;
+	private String tag;
 
 	public long getId() {
 		return id;
@@ -74,6 +75,14 @@ public class Command implements Serializable {
 
 	public void setPattern(String param) {
 		this.pattern = param;
+	}
+
+	public String getTag() {
+		return tag;
+	}
+
+	public void setTag(String param) {
+		this.tag = param;
 	}
 
 }

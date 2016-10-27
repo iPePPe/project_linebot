@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CommandData>
+	<Commands>
+		<command>HELP</command>
+		<sourceSystem>SAP</sourceSystem>
+		<langu>EN</langu>
+		<description> Full command list with sample </description>
+		<pattern><![CDATA[ [ "help", "help-<pattern>" (e.g. "help-b*") ]]]></pattern>
+	</Commands>
+	<Commands>
+		<command>COMMAND</command>
+		<sourceSystem>SAP</sourceSystem>
+		<langu>EN</langu>
+		<description> Command List (no sample) </description>
+		<pattern><![CDATA[ [ "command", "command-<pattern>" (e.g. "command-b*", "command-c++") ]]]></pattern>
+	</Commands>
+	<Commands>
+		<command>COMMANDLIST</command>
+		<sourceSystem>SAP</sourceSystem>
+		<langu>EN</langu>
+		<description> Command list sort by alphabet (without any description)
+		</description>
+		<pattern><![CDATA[ [ "commandlist", "commandlist-<pattern>" (e.g. "commandlist-b*", "commandlist-c++") ]]]></pattern>
+	</Commands>
+	<Commands>
+		<command>MYSITE</command>
+		<sourceSystem>SAP</sourceSystem>
+		<langu>EN</langu>
+		<description> Work schedule for me </description>
+		<pattern><![CDATA[  [ "mysite", "mysite-<yyyymm>", "mysite-<mm>" ]]]></pattern>
+
+	</Commands>
+	<Commands>
+		<command>MYSKILL</command>
+		<sourceSystem>SAP</sourceSystem>
+		<langu>EN</langu>
+		<description> Work schedule for me </description>
+		<pattern><![CDATA[  [ "mysite", "mysite-<yyyymm>", "mysite-<mm>" ]]]></pattern>
+	</Commands>
+	<Commands>
+		<command>SKILL</command>
+		<sourceSystem>SAP</sourceSystem>
+		<langu>EN</langu>
+		<description> Skill analysis of a specific person  </description>
+		<pattern><![CDATA[ [ "skill-<Employee ID>" ]]]></pattern>
+	</Commands>
+	<Commands>
+		<command>MYSITES</command>
+		<sourceSystem>SAP</sourceSystem>
+		<langu>EN</langu>
+		<description> Work schedule for me (Summary Layout) </description>
+		<pattern><![CDATA[ [ "mysites", "mysites-<yyyymm>", "mysites-<mm>" ]]]></pattern>
+	</Commands>
+	<Commands>
+		<command>SITES</command>
+		<sourceSystem>SAP</sourceSystem>
+		<langu>EN</langu>
+		<description>Work schedule for specific person (Summary Layout)
+		</description>
+		<pattern><![CDATA[[ "sites-<Employee ID>", "sites-<Employee ID>-<yyyymm>", "sites-<Employee ID>-<mm>" ]]]></pattern>
+	</Commands>
+	<Commands>
+		<command>REGIS</command>
+		<sourceSystem>SAP</sourceSystem>
+		<langu>EN</langu>
+		<description>Register your account</description>
+		<pattern><![CDATA[[ Regis-<SAP User> to register ]]]></pattern>
+	</Commands>
+	<Commands>
+		<command>REGIS</command>
+		<sourceSystem>SAP</sourceSystem>
+		<langu>EN</langu>
+		<description>Register your account</description>
+		<pattern><![CDATA[[ Regis-<SAP User> to register ]]]></pattern>
+	</Commands>
+</CommandData>
