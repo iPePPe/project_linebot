@@ -42,6 +42,14 @@ public class VideoMessageContent implements MessageContent {
 	@Override
 	public String getId() {
 		// TODO Auto-generated method stub
-		return null;
+		return this.id;
+	}
+
+	public String getType() {
+		return this.type;
+	}
+
+	public String getUrl() {
+		return this.url;
 	}
 }

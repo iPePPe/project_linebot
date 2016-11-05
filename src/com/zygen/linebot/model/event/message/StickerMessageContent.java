@@ -47,17 +47,17 @@ public class StickerMessageContent implements MessageContent {
 	@Override
 	public String getId() {
 		// TODO Auto-generated method stub
-		return null;
+		return this.id;
 	}
     public String getType() {
-		return type;
+		return this.type;
 	}
 
 	public String getPackageId() {
-		return packageId;
+		return this.packageId;
 	}
 
 	public String getStickerId() {
-		return stickerId;
+		return this.stickerId;
 	}
 }

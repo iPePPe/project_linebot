@@ -44,6 +44,7 @@ import com.zygen.linebot.model.event.PostbackEvent;
 import com.zygen.linebot.model.event.UnfollowEvent;
 import com.zygen.linebot.model.event.UnknownEvent;
 import com.zygen.linebot.model.event.message.TextMessageContent;
+import com.zygen.linebot.model.event.message.VideoMessageContent;
 import com.zygen.linebot.model.message.Message;
 import com.zygen.linebot.model.message.TextMessage;
 import com.zygen.linebot.model.response.BotApiResponse;
@@ -271,7 +272,12 @@ public class CallbackHCPServlet extends HttpServlet {
 					me.setMessageId(imageContent.getId());
 					me.setType(imageContent.getType());
 					me.setUrl(imageContent.getUrl());
-				}
+				} else if (message instanceof VideoMessageContent){
+					VideoMessageContent vContent = (VideoMessageContent) message;
+					me.setMessageId(vContent.getId());
+					me.setType(vContent.getType());
+					me.setUrl(vContent.getUrl());
+				}	
 			} else if (event instanceof UnfollowEvent) {
 				
 			} else if (event instanceof FollowEvent) {

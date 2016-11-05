@@ -53,25 +53,25 @@ public class LocationMessageContent implements MessageContent {
 	@Override
 	public String getId() {
 		// TODO Auto-generated method stub
-		return null;
+		return this.id;
 	}
     public String getType() {
-		return type;
+		return this.type;
 	}
 
 	public String getTitle() {
-		return title;
+		return this.title;
 	}
 
 	public String getAddress() {
-		return address;
+		return this.address;
 	}
 
 	public double getLatitude() {
-		return latitude;
+		return this.latitude;
 	}
 
 	public double getLongitude() {
-		return longitude;
+		return this.longitude;
 	}
 }

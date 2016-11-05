@@ -42,15 +42,15 @@ public class ImageMessageContent implements MessageContent {
 	@Override
 	public String getId() {
 		// TODO Auto-generated method stub
-		return null;
+		return this.id;
 	}
 
 	public String getType() {
-		return type;
+		return this.type;
 	}
 
 	public String getUrl() {
-		return url;
+		return this.url;
 	}
 	
 }
