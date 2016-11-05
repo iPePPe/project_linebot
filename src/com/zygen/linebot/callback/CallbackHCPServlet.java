@@ -302,20 +302,6 @@ public class CallbackHCPServlet extends HttpServlet {
 		}
 	}
 
-	private Class<?> getPropertyType(Class<?> clazz, String property) {
-		try {
-			LinkedList<String> properties = new LinkedList<String>();
-			properties.addAll(Arrays.asList(property.split("\\.")));
-			Field field = null;
-			while (!properties.isEmpty()) {
-				field = clazz.getDeclaredField(properties.removeFirst());
-				clazz = field.getType();
-			}
-			return field.getType();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
 
 	private void replyLine(List<TextMessage> textMessage, String replyToken) {
 

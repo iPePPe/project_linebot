@@ -2,7 +2,7 @@ package com.zygen.hcp.jpa;
 
 import static javax.persistence.TemporalType.TIMESTAMP;
 
-import java.math.BigDecimal;
+
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
