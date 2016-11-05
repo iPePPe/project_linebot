@@ -21,41 +21,41 @@ import java.time.Instant;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+
+import com.zygen.linebot.model.event.postback.PostbackContent;
 import com.zygen.linebot.model.event.source.Source;
 
 import lombok.Value;
 
 @Value
-@JsonTypeName("follow")
-public class FollowEvent implements Event {
+@JsonTypeName("postback")
+public class PostbackEvent implements Event {
     private final String replyToken;
     private final Source source;
+    private final PostbackContent postbackContent;
     private final Instant timestamp;
 
     @JsonCreator
-    public FollowEvent(
+    public PostbackEvent(
             @JsonProperty("replyToken") String replyToken,
             @JsonProperty("source") Source source,
+            @JsonProperty("postback") PostbackContent postbackContent,
             @JsonProperty("timestamp") Instant timestamp) {
         this.replyToken = replyToken;
         this.source = source;
+        this.postbackContent = postbackContent;
         this.timestamp = timestamp;
     }
 
 	@Override
 	public Source getSource() {
 		// TODO Auto-generated method stub
-		return this.source;
+		return null;
 	}
 
 	@Override
 	public Instant getTimestamp() {
 		// TODO Auto-generated method stub
-		return this.timestamp;
+		return null;
 	}
-
-	public String getReplyToken() {
-		return this.replyToken;
-	}
-	
 }

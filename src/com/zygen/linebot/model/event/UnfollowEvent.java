@@ -21,41 +21,35 @@ import java.time.Instant;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+
 import com.zygen.linebot.model.event.source.Source;
 
 import lombok.Value;
 
 @Value
-@JsonTypeName("follow")
-public class FollowEvent implements Event {
-    private final String replyToken;
+@JsonTypeName("unfollow")
+public class UnfollowEvent implements Event {
     private final Source source;
     private final Instant timestamp;
 
     @JsonCreator
-    public FollowEvent(
-            @JsonProperty("replyToken") String replyToken,
+    public UnfollowEvent(
             @JsonProperty("source") Source source,
             @JsonProperty("timestamp") Instant timestamp) {
-        this.replyToken = replyToken;
         this.source = source;
         this.timestamp = timestamp;
     }
 
 	@Override
-	public Source getSource() {
+	public com.zygen.linebot.model.event.source.Source getSource() {
 		// TODO Auto-generated method stub
-		return this.source;
+		return null;
 	}
 
 	@Override
 	public Instant getTimestamp() {
 		// TODO Auto-generated method stub
-		return this.timestamp;
-	}
-
-	public String getReplyToken() {
-		return this.replyToken;
+		return null;
 	}
 	
 }

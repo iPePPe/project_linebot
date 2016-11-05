@@ -14,40 +14,23 @@
  * under the License.
  */
 
-package com.zygen.linebot.model.event.message;
+package com.zygen.linebot.model.event.postback;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import lombok.Value;
 
 @Value
-@JsonTypeName("text")
-public class TextMessageContent implements MessageContent {
-    private final String id;
-    private final String type;
-    private final String text;
-
+public class PostbackContent {
+    private final String data;
+    private final Object params;
 
     @JsonCreator
-    public TextMessageContent(
-            @JsonProperty("id") String id,
-            @JsonProperty("type") String type,
-            @JsonProperty("text") String text) {
-        this.id = id;
-        this.type = type;
-        this.text = text;
-        
-    }
-    @Override
-    public String getId(){
-    	return this.id;
-    }
-    public String getText(){
-    	return this.text;
-    }
-    public String getType(){
-    	return this.type;
+    public PostbackContent(
+            @JsonProperty("data") String data,
+            @JsonProperty("params") Object params) {
+        this.data = data;
+        this.params = params;
     }
 }

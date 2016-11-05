@@ -21,25 +21,31 @@ import java.time.Instant;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+
+import com.zygen.linebot.model.event.beacon.BeaconContent;
 import com.zygen.linebot.model.event.source.Source;
 
 import lombok.Value;
 
 @Value
-@JsonTypeName("follow")
-public class FollowEvent implements Event {
+@JsonTypeName("beacon")
+public class BeaconEvent implements Event {
     private final String replyToken;
     private final Source source;
+    private final BeaconContent beacon;
     private final Instant timestamp;
 
     @JsonCreator
-    public FollowEvent(
+    public BeaconEvent(
             @JsonProperty("replyToken") String replyToken,
             @JsonProperty("source") Source source,
-            @JsonProperty("timestamp") Instant timestamp) {
+            @JsonProperty("timestamp") Instant timestamp,
+            @JsonProperty("beacon") BeaconContent beacon
+    ) {
         this.replyToken = replyToken;
         this.source = source;
         this.timestamp = timestamp;
+        this.beacon = beacon;
     }
 
 	@Override
@@ -55,7 +61,11 @@ public class FollowEvent implements Event {
 	}
 
 	public String getReplyToken() {
-		return this.replyToken;
+		return replyToken;
+	}
+
+	public BeaconContent getBeacon() {
+		return beacon;
 	}
 	
 }

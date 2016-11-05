@@ -21,21 +21,23 @@ import java.time.Instant;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+
+import com.zygen.linebot.model.event.source.GroupSource;
 import com.zygen.linebot.model.event.source.Source;
 
 import lombok.Value;
 
 @Value
-@JsonTypeName("follow")
-public class FollowEvent implements Event {
+@JsonTypeName("join")
+public class JoinEvent implements Event {
     private final String replyToken;
-    private final Source source;
+    private final GroupSource source;
     private final Instant timestamp;
 
     @JsonCreator
-    public FollowEvent(
+    public JoinEvent(
             @JsonProperty("replyToken") String replyToken,
-            @JsonProperty("source") Source source,
+            @JsonProperty("source") GroupSource source,
             @JsonProperty("timestamp") Instant timestamp) {
         this.replyToken = replyToken;
         this.source = source;

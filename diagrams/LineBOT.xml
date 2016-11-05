@@ -13,7 +13,7 @@
 	<entity>
 		<entity-name>com.zygen.hcp.jpa.MessageEvent</entity-name>
 		<entity-width>120</entity-width>
-		<entity-height>246</entity-height>
+		<entity-height>466</entity-height>
 		<entity-X-Coordinate>258</entity-X-Coordinate>
 		<entity-Y-Coordinate>89</entity-Y-Coordinate>
 		<primary-collapsed>false</primary-collapsed>

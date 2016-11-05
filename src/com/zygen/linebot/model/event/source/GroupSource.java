@@ -14,48 +14,46 @@
  * under the License.
  */
 
-package com.zygen.linebot.model.event;
-
-import java.time.Instant;
+package com.zygen.linebot.model.event.source;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.zygen.linebot.model.event.source.Source;
 
 import lombok.Value;
 
 @Value
-@JsonTypeName("follow")
-public class FollowEvent implements Event {
-    private final String replyToken;
-    private final Source source;
-    private final Instant timestamp;
+@JsonTypeName("group")
+public class GroupSource implements Source {
+    private final String groupId;
+    private final String userId;
 
+    /**
+     * Create new instance.
+     * @param groupId group ID
+     * @param userId user id may be null
+     */
     @JsonCreator
-    public FollowEvent(
-            @JsonProperty("replyToken") String replyToken,
-            @JsonProperty("source") Source source,
-            @JsonProperty("timestamp") Instant timestamp) {
-        this.replyToken = replyToken;
-        this.source = source;
-        this.timestamp = timestamp;
+    public GroupSource(
+            @JsonProperty("groupId") String groupId,
+            @JsonProperty("userId") String userId
+    ) {
+        this.groupId = groupId;
+        this.userId = userId;
     }
 
-	@Override
-	public Source getSource() {
-		// TODO Auto-generated method stub
-		return this.source;
+    @Override
+    public String getSenderId() {
+        return userId;
+    }
+
+	public String getGroupId() {
+		return groupId;
 	}
 
 	@Override
-	public Instant getTimestamp() {
+	public String getUserId() {
 		// TODO Auto-generated method stub
-		return this.timestamp;
+		return userId;
 	}
-
-	public String getReplyToken() {
-		return this.replyToken;
-	}
-	
 }

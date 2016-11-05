@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 
 import javax.naming.Context;
@@ -11,12 +12,12 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.Query;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,20 +28,31 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.io.ByteStreams;
+
+import com.zygen.linebot.model.event.message.AudioMessageContent;
+import com.zygen.linebot.model.event.message.ImageMessageContent;
+import com.zygen.linebot.model.event.message.LocationMessageContent;
+import com.zygen.linebot.model.event.message.StickerMessageContent;
+import com.zygen.linebot.model.event.message.MessageContent;
 import com.sap.cloud.account.TenantContext;
 import com.zygen.linebot.model.event.Event;
+import com.zygen.linebot.model.event.FollowEvent;
+import com.zygen.linebot.model.event.JoinEvent;
+import com.zygen.linebot.model.event.LeaveEvent;
 import com.zygen.linebot.model.event.MessageEvent;
+import com.zygen.linebot.model.event.PostbackEvent;
+import com.zygen.linebot.model.event.UnfollowEvent;
+import com.zygen.linebot.model.event.UnknownEvent;
 import com.zygen.linebot.model.event.message.TextMessageContent;
-import com.zygen.linebot.model.event.source.UserSource;
 import com.zygen.linebot.model.message.Message;
 import com.zygen.linebot.model.message.TextMessage;
 import com.zygen.linebot.model.response.BotApiResponse;
 import com.zygen.odata.client.ODataMessageBuilder;
 import com.zygen.odata.model.message.ZtextMessageV2;
 import com.zygen.linebot.model.ReplyMessage;
+import com.zygen.linebot.model.event.BeaconEvent;
 import com.zygen.linebot.model.event.CallbackRequest;
 import com.zygen.hcp.jpa.JPAEntityFactoryManager;
-import com.zygen.hcp.jpa.UserProfile;
 import com.zygen.hcp.model.UserProfileModel;
 import com.zygen.linebot.client.DestinationUtil;
 import com.zygen.linebot.client.LineMessagingServiceBuilder;
@@ -49,6 +61,8 @@ import com.zygen.linebot.client.LineSignatureValidator;
 import retrofit2.Response;
 
 import java.sql.Date;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -155,27 +169,20 @@ public class CallbackHCPServlet extends HttpServlet {
 			if (callbackRequest == null || callbackRequest.getEvents() == null) {
 				throw new CallBackServletException("Invalid content");
 			} else {
-				final List<Event> result = callbackRequest.getEvents();
-				final MessageEvent messageEvent = (MessageEvent) result.get(0);
-
-				replyToken = messageEvent.getReplyToken();
-				addMessageEventToDB(messageEvent, channelId);
-
-				final UserSource source = (UserSource) messageEvent.getSource();
-				final String userId = source.getUserId();
-				final TextMessageContent text = (TextMessageContent) messageEvent.getMessage();
+				final List<Event> events = callbackRequest.getEvents();
 				
-				String linetext = text.getText();
+				
+		        for (Event event : events) {
+		            try {
+		            	handleEvent(event, channelId);
 
-				ZtextMessageV2 ztext = new ZtextMessageV2(channelId, linetext, userId);
-				ODataMessageBuilder odata = new ODataMessageBuilder("ZGFMLGW2HCollection", ztext.getId(),
-						"HeaderToDetailNav");
-				List<Message> msg = odata.getMessage();
-				if (msg.size() > 0) {
-					replyMessageLine(msg, messageEvent.getReplyToken());
-				} else {
-					replyLine(new TextMessage("I don't know"), messageEvent.getReplyToken());
-				}
+
+		            } catch (IOException e) {
+		            	//replyLine(new TextMessage("Error"), messageEvent.getReplyToken());
+		            }
+		        }
+				
+
 
 			}
 		} catch (Exception e) {
@@ -203,7 +210,7 @@ public class CallbackHCPServlet extends HttpServlet {
 		return currentTenantId;
 	}
 
-	public void addMessageEventToDB(MessageEvent messageEvent, String ch) throws Exception {
+	public void handleEvent(Event event, String ch) throws Exception {
 
 		emf = this.getEntityManagerFactory();
 
@@ -212,31 +219,101 @@ public class CallbackHCPServlet extends HttpServlet {
 
 			com.zygen.hcp.jpa.MessageEvent me = new com.zygen.hcp.jpa.MessageEvent();
 			// UserProfile user = new UserProfile();
-			me.setReplyToken(messageEvent.getReplyToken());
-			me.setText(((TextMessageContent) messageEvent.getMessage()).getText());
-			me.setTimestamp(Date.from(messageEvent.getTimestamp()));
-			me.setType(((TextMessageContent) messageEvent.getMessage()).getType());
-			me.setUserId(messageEvent.getSource().getUserId());
-			me.setChannel(ch);
-			/*
-			 * Query query = em
-			 * .createQuery("SELECT s FROM UserProfile s WHERE s.userId =" +
-			 * messageEvent.getSource().getUserId());
-			 * user.setUserId(messageEvent.getSource().getUserId());
-			 */
+		
+			if (event instanceof MessageEvent) {
+				MessageEvent messageEvent = (MessageEvent) event;
+				me.setReplyToken(messageEvent.getReplyToken());
+				me.setTimestamp(Date.from(messageEvent.getTimestamp()));
+				me.setUserId(messageEvent.getSource().getUserId());
+				me.setChannel(ch);
+
+				MessageContent message = messageEvent.getMessage();
+				if (message instanceof TextMessageContent) {
+					TextMessageContent textContent = (TextMessageContent) message;
+					me.setMessageId(textContent.getId());
+					me.setType(textContent.getType());
+					me.setText(textContent.getText());
+					
+					ZtextMessageV2 ztext = new ZtextMessageV2(ch, textContent.getText(), messageEvent.getSource().getUserId());
+					ODataMessageBuilder odata = new ODataMessageBuilder("ZGFMLGW2HCollection", ztext.getId(),
+							"HeaderToDetailNav");
+					List<Message> msg = odata.getMessage();
+					if (msg.size() > 0) {
+						replyMessageLine(msg, messageEvent.getReplyToken());
+					} else {
+						replyLine(new TextMessage("I don't know"), messageEvent.getReplyToken());
+					}
+				} else if (message instanceof StickerMessageContent) {
+					StickerMessageContent stkContent = (StickerMessageContent) message;
+
+					me.setMessageId(stkContent.getId());
+					me.setType(stkContent.getType());
+					me.setPackageId(stkContent.getPackageId());
+					me.setStickerId(stkContent.getStickerId());
+
+				} else if (message instanceof LocationMessageContent) {
+					LocationMessageContent locationMessage = (LocationMessageContent) message;
+					me.setMessageId(locationMessage.getId());
+					me.setLatitude(locationMessage.getLatitude());
+					me.setLongitude(locationMessage.getLongitude());
+					me.setTitle(locationMessage.getTitle());
+					me.setAddress(locationMessage.getAddress());
+					me.setType(locationMessage.getType());
+
+				} else if (message instanceof AudioMessageContent) {
+					AudioMessageContent auContent = (AudioMessageContent) message;
+					me.setMessageId(auContent.getId());
+					me.setType(auContent.getType());
+					me.setUrl(auContent.getUrl());
+
+				} else if (message instanceof ImageMessageContent) {
+					ImageMessageContent imageContent = (ImageMessageContent) message;
+					me.setMessageId(imageContent.getId());
+					me.setType(imageContent.getType());
+					me.setUrl(imageContent.getUrl());
+				}
+			} else if (event instanceof UnfollowEvent) {
+				
+			} else if (event instanceof FollowEvent) {
+				
+			} else if (event instanceof JoinEvent) {
+				
+			} else if (event instanceof LeaveEvent) {
+				
+			} else if (event instanceof BeaconEvent) {
+				
+			} else if (event instanceof PostbackEvent) {
+				
+			} else if (event instanceof UnknownEvent) {
+				
+			}
+
 			em.getTransaction().begin();
 			em.setProperty("me-tenant.id", this.getCurrentTenantId());
-			//em.persist(me);
-			//Query query = em.createQuery("SELECT s FROM USERPROFILE s WHERE s.USERID =" + messageEvent.getSource().getUserId());
+
 			UserProfileModel upm = new UserProfileModel();
-			em.persist(upm.checkCreateUserProfile(em, messageEvent.getSource().getUserId(),
-												  this.getCurrentTenantId(), 
-												  dest.getChannelAccessToken(),me));
+			em.persist(upm.checkCreateUserProfile(em, event.getSource().getUserId(), this.getCurrentTenantId(),
+					dest.getChannelAccessToken(), me));
 			em.getTransaction().commit();
 		} catch (Exception e) {
 			LOGGER.error("DB Error " + e.getMessage());
 		} finally {
 			em.close();
+		}
+	}
+
+	private Class<?> getPropertyType(Class<?> clazz, String property) {
+		try {
+			LinkedList<String> properties = new LinkedList<String>();
+			properties.addAll(Arrays.asList(property.split("\\.")));
+			Field field = null;
+			while (!properties.isEmpty()) {
+				field = clazz.getDeclaredField(properties.removeFirst());
+				clazz = field.getType();
+			}
+			return field.getType();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 

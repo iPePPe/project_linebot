@@ -26,19 +26,21 @@ import lombok.Value;
 @JsonTypeName("user")
 public class UserSource implements Source {
     private final String userId;
-
+    
     @JsonCreator
     public UserSource(@JsonProperty("userId") String userId) {
         this.userId = userId;
     }
 
-/*    @Override
+    @Override
     public String getSenderId() {
         return userId;
-    }*/
+    }
     @Override
     public String getUserId(){
     	return userId;
     	
     }
+
+
 }

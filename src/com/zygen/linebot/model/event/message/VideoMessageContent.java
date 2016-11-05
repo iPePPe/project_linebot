@@ -14,48 +14,34 @@
  * under the License.
  */
 
-package com.zygen.linebot.model.event;
-
-import java.time.Instant;
+package com.zygen.linebot.model.event.message;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.zygen.linebot.model.event.source.Source;
 
 import lombok.Value;
 
 @Value
-@JsonTypeName("follow")
-public class FollowEvent implements Event {
-    private final String replyToken;
-    private final Source source;
-    private final Instant timestamp;
+@JsonTypeName("video")
+public class VideoMessageContent implements MessageContent {
+    private final String id;
+    private final String type;
+    private final String url;
 
     @JsonCreator
-    public FollowEvent(
-            @JsonProperty("replyToken") String replyToken,
-            @JsonProperty("source") Source source,
-            @JsonProperty("timestamp") Instant timestamp) {
-        this.replyToken = replyToken;
-        this.source = source;
-        this.timestamp = timestamp;
+    public VideoMessageContent(
+            @JsonProperty("id") String id,
+            @JsonProperty("type") String type,
+            @JsonProperty("url") String url) {
+        this.id = id;
+        this.type = type;
+        this.url = url;
     }
 
 	@Override
-	public Source getSource() {
+	public String getId() {
 		// TODO Auto-generated method stub
-		return this.source;
+		return null;
 	}
-
-	@Override
-	public Instant getTimestamp() {
-		// TODO Auto-generated method stub
-		return this.timestamp;
-	}
-
-	public String getReplyToken() {
-		return this.replyToken;
-	}
-	
 }

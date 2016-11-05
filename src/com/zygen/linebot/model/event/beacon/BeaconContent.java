@@ -14,40 +14,21 @@
  * under the License.
  */
 
-package com.zygen.linebot.model.event.message;
+package com.zygen.linebot.model.event.beacon;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import lombok.Value;
 
 @Value
-@JsonTypeName("text")
-public class TextMessageContent implements MessageContent {
-    private final String id;
+public class BeaconContent {
+    private final String hwid;
     private final String type;
-    private final String text;
 
-
-    @JsonCreator
-    public TextMessageContent(
-            @JsonProperty("id") String id,
-            @JsonProperty("type") String type,
-            @JsonProperty("text") String text) {
-        this.id = id;
+    public BeaconContent(
+            @JsonProperty("hwid") String hwid,
+            @JsonProperty("type") String type) {
+        this.hwid = hwid;
         this.type = type;
-        this.text = text;
-        
-    }
-    @Override
-    public String getId(){
-    	return this.id;
-    }
-    public String getText(){
-    	return this.text;
-    }
-    public String getType(){
-    	return this.type;
     }
 }

@@ -14,48 +14,50 @@
  * under the License.
  */
 
-package com.zygen.linebot.model.event;
-
-import java.time.Instant;
+package com.zygen.linebot.model.event.message;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.zygen.linebot.model.event.source.Source;
 
 import lombok.Value;
 
 @Value
-@JsonTypeName("follow")
-public class FollowEvent implements Event {
-    private final String replyToken;
-    private final Source source;
-    private final Instant timestamp;
+@JsonTypeName("sticker")
+public class StickerMessageContent implements MessageContent {
+
+
+	private final String id;
+    private final String type;
+    private final String packageId;
+    private final String stickerId;
 
     @JsonCreator
-    public FollowEvent(
-            @JsonProperty("replyToken") String replyToken,
-            @JsonProperty("source") Source source,
-            @JsonProperty("timestamp") Instant timestamp) {
-        this.replyToken = replyToken;
-        this.source = source;
-        this.timestamp = timestamp;
+    public StickerMessageContent(
+            @JsonProperty("id") String id,
+            @JsonProperty("type") String type,
+            @JsonProperty("packageId") String packageId,
+            @JsonProperty("stickerId") String stickerId) {
+        this.id = id;
+        this.type = type;
+        this.packageId = packageId;
+        this.stickerId = stickerId;
     }
 
 	@Override
-	public Source getSource() {
+	public String getId() {
 		// TODO Auto-generated method stub
-		return this.source;
+		return null;
+	}
+    public String getType() {
+		return type;
 	}
 
-	@Override
-	public Instant getTimestamp() {
-		// TODO Auto-generated method stub
-		return this.timestamp;
+	public String getPackageId() {
+		return packageId;
 	}
 
-	public String getReplyToken() {
-		return this.replyToken;
+	public String getStickerId() {
+		return stickerId;
 	}
-	
 }
