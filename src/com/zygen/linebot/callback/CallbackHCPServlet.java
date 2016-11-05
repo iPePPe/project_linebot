@@ -164,6 +164,7 @@ public class CallbackHCPServlet extends HttpServlet {
 				final UserSource source = (UserSource) messageEvent.getSource();
 				final String userId = source.getUserId();
 				final TextMessageContent text = (TextMessageContent) messageEvent.getMessage();
+				
 				String linetext = text.getText();
 
 				ZtextMessageV2 ztext = new ZtextMessageV2(channelId, linetext, userId);
