@@ -3,6 +3,7 @@ package com.zygen.hcp.model;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -58,7 +59,9 @@ public class UserProfileModel {
 				user.setStatus("New");
 				user.setCreateDate(new Date());
 				user.setUserId(userId);
-				user.setMessageEvent(Arrays.asList(me));
+				ArrayList<MessageEvent> mel = new ArrayList<MessageEvent>();
+				mel.add(me);
+				user.setMessageEvent(mel);
 
 			} else {
 				LOGGER.error(response.message());

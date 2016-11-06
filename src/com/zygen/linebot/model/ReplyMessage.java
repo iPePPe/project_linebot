@@ -1,10 +1,17 @@
 package com.zygen.linebot.model;
 
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.zygen.linebot.model.message.Message;
 
 
@@ -35,7 +42,7 @@ public class ReplyMessage {
 
 	}
 	
-/*	public String toJSON(boolean prettyPrint) throws JsonGenerationException, JsonMappingException, IOException {
+	public String toJSON(boolean prettyPrint) throws JsonGenerationException, JsonMappingException, IOException {
 		String json = null;
 		ObjectMapper mapper = new ObjectMapper(); // Setup Jackson
 		mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
@@ -49,5 +56,5 @@ public class ReplyMessage {
 		json = writer.writeValueAsString(this);
 
 		return json;
-	}*/
+	}
 }

@@ -27,8 +27,8 @@ import lombok.Value;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeName("message")
 public class MessageAction implements Action {
-    private final String label;
-    private final String text;
+    private final @JsonProperty String label;
+    private final @JsonProperty String text;
 
     @JsonCreator
     public MessageAction(

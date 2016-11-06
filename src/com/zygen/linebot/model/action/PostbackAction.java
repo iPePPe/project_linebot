@@ -30,9 +30,9 @@ import lombok.Value;
 @JsonTypeName("postback")
 @JsonInclude(Include.NON_NULL)
 public class PostbackAction implements Action {
-    private final String label;
-    private final String data;
-    private final String text;
+    private final @JsonProperty String label;
+    private final @JsonProperty String data;
+    private final @JsonProperty String text;
 
     /**
      * @param text text message (optional)

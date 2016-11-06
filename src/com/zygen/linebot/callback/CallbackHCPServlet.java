@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 
 import javax.naming.Context;
@@ -17,14 +16,16 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonGenerationException;
 
 //import javax.naming.InitialContext;
 //import javax.naming.NamingException;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.io.ByteStreams;
@@ -46,11 +47,18 @@ import com.zygen.linebot.model.event.UnknownEvent;
 import com.zygen.linebot.model.event.message.TextMessageContent;
 import com.zygen.linebot.model.event.message.VideoMessageContent;
 import com.zygen.linebot.model.message.Message;
+import com.zygen.linebot.model.message.TemplateMessage;
 import com.zygen.linebot.model.message.TextMessage;
+import com.zygen.linebot.model.message.template.ButtonsTemplate;
+import com.zygen.linebot.model.message.template.Template;
 import com.zygen.linebot.model.response.BotApiResponse;
 import com.zygen.odata.client.ODataMessageBuilder;
 import com.zygen.odata.model.message.ZtextMessageV2;
+import com.zygen.linebot.model.PushMessage;
 import com.zygen.linebot.model.ReplyMessage;
+import com.zygen.linebot.model.action.Action;
+import com.zygen.linebot.model.action.MessageAction;
+import com.zygen.linebot.model.action.PostbackAction;
 import com.zygen.linebot.model.event.BeaconEvent;
 import com.zygen.linebot.model.event.CallbackRequest;
 import com.zygen.hcp.jpa.JPAEntityFactoryManager;
@@ -63,7 +71,6 @@ import retrofit2.Response;
 
 import java.sql.Date;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -171,19 +178,16 @@ public class CallbackHCPServlet extends HttpServlet {
 				throw new CallBackServletException("Invalid content");
 			} else {
 				final List<Event> events = callbackRequest.getEvents();
-				
-				
-		        for (Event event : events) {
-		            try {
-		            	handleEvent(event, channelId);
 
+				for (Event event : events) {
+					try {
+						handleEvent(event, channelId);
 
-		            } catch (IOException e) {
-		            	//replyLine(new TextMessage("Error"), messageEvent.getReplyToken());
-		            }
-		        }
-				
-
+					} catch (IOException e) {
+						// replyLine(new TextMessage("Error"),
+						// messageEvent.getReplyToken());
+					}
+				}
 
 			}
 		} catch (Exception e) {
@@ -220,7 +224,7 @@ public class CallbackHCPServlet extends HttpServlet {
 
 			com.zygen.hcp.jpa.MessageEvent me = new com.zygen.hcp.jpa.MessageEvent();
 			// UserProfile user = new UserProfile();
-		
+
 			if (event instanceof MessageEvent) {
 				MessageEvent messageEvent = (MessageEvent) event;
 				me.setReplyToken(messageEvent.getReplyToken());
@@ -234,15 +238,22 @@ public class CallbackHCPServlet extends HttpServlet {
 					me.setMessageId(textContent.getId());
 					me.setType(textContent.getType());
 					me.setText(textContent.getText());
-					
-					ZtextMessageV2 ztext = new ZtextMessageV2(ch, textContent.getText(), messageEvent.getSource().getUserId());
-					ODataMessageBuilder odata = new ODataMessageBuilder("ZGFMLGW2HCollection", ztext.getId(),
-							"HeaderToDetailNav");
-					List<Message> msg = odata.getMessage();
-					if (msg.size() > 0) {
-						replyMessageLine(msg, messageEvent.getReplyToken());
+					if (textContent.getText().equals("Welcome")) {
+						TemplateMessage welcome = createWelcome("Welcome");
+						//push((Message)welcome,messageEvent.getSource().getUserId());
+						reply((Message)welcome,messageEvent.getReplyToken());
+						//replyLine(new TextMessage("Wellll"), messageEvent.getReplyToken());
 					} else {
-						replyLine(new TextMessage("I don't know"), messageEvent.getReplyToken());
+						ZtextMessageV2 ztext = new ZtextMessageV2(ch, textContent.getText(),
+								messageEvent.getSource().getUserId());
+						ODataMessageBuilder odata = new ODataMessageBuilder("ZGFMLGW2HCollection", ztext.getId(),
+								"HeaderToDetailNav");
+						List<Message> msg = odata.getMessage();
+						if (msg.size() > 0) {
+							replyMessageLine(msg, messageEvent.getReplyToken());
+						} else {
+							replyLine(new TextMessage("I don't know"), messageEvent.getReplyToken());
+						}
 					}
 				} else if (message instanceof StickerMessageContent) {
 					StickerMessageContent stkContent = (StickerMessageContent) message;
@@ -272,26 +283,26 @@ public class CallbackHCPServlet extends HttpServlet {
 					me.setMessageId(imageContent.getId());
 					me.setType(imageContent.getType());
 					me.setUrl(imageContent.getUrl());
-				} else if (message instanceof VideoMessageContent){
+				} else if (message instanceof VideoMessageContent) {
 					VideoMessageContent vContent = (VideoMessageContent) message;
 					me.setMessageId(vContent.getId());
 					me.setType(vContent.getType());
 					me.setUrl(vContent.getUrl());
-				}	
+				}
 			} else if (event instanceof UnfollowEvent) {
-				
+
 			} else if (event instanceof FollowEvent) {
-				
+
 			} else if (event instanceof JoinEvent) {
-				
+
 			} else if (event instanceof LeaveEvent) {
-				
+
 			} else if (event instanceof BeaconEvent) {
-				
+
 			} else if (event instanceof PostbackEvent) {
-				
+
 			} else if (event instanceof UnknownEvent) {
-				
+
 			}
 
 			em.getTransaction().begin();
@@ -308,6 +319,23 @@ public class CallbackHCPServlet extends HttpServlet {
 		}
 	}
 
+	private TemplateMessage createWelcome(String altText) {
+		// TODO Auto-generated method stub
+		// Template template = new Template();
+
+		PostbackAction help = new PostbackAction("Help1", "help2", "Text Help");
+		MessageAction mHelp = new MessageAction("help label", "help");
+		ButtonsTemplate button = createButtion("https://dl.dropboxusercontent.com/u/57992228/nice/management.png",
+				"Hi..Title", "b text", Arrays.asList(help, mHelp));
+		return new TemplateMessage(altText, (Template) button);
+	}
+
+	private ButtonsTemplate createButtion(String url, String title, String text, List<Action> action) {
+		// TODO Auto-generated method stub
+		ButtonsTemplate button = new ButtonsTemplate(url, title, text, action);
+
+		return button;
+	}
 
 	private void replyLine(List<TextMessage> textMessage, String replyToken) {
 
@@ -317,7 +345,6 @@ public class CallbackHCPServlet extends HttpServlet {
 	private void replyLine(TextMessage textMessage, String replyToken) {
 
 		ReplyMessage replyMessage = new ReplyMessage(replyToken, (Message) textMessage);
-
 		Response<BotApiResponse> res;
 		try {
 			res = LineMessagingServiceBuilder.create(dest.getChannelAccessToken()).build().replyMessage(replyMessage)
@@ -331,7 +358,49 @@ public class CallbackHCPServlet extends HttpServlet {
 			e.printStackTrace();
 		}
 	}
+	private void push(Message message, String userId) {
+		
+		Response<BotApiResponse> res;
+		PushMessage pushMessage;
+		try {
+			
+			pushMessage = new PushMessage(userId, Arrays.asList(message));
 
+			res = LineMessagingServiceBuilder.create(dest.getChannelAccessToken())
+					.apiEndPoint(dest.getUrl()).build().pushMessage(pushMessage).execute();
+			
+			//res = LineMessagingServiceBuilder.create(dest.getChannelAccessToken()).build().replyMessage(replyMessage)
+			//		.execute();
+			if (res.code() != 200) {
+				String error = this.readStream(res.errorBody().byteStream());
+				LOGGER.debug("Push:"+pushMessage.toJSON(false));
+				LOGGER.debug("BODY: " + error);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+private void reply(Message message, String tokenReply) {
+		
+		Response<BotApiResponse> res;
+		ReplyMessage replyMessage;
+		try {
+			
+			replyMessage = new ReplyMessage(tokenReply, Arrays.asList(message));			
+			res = LineMessagingServiceBuilder.create(dest.getChannelAccessToken()).build().replyMessage(replyMessage)
+					.execute();
+			if (res.code() != 200) {
+				String error = this.readStream(res.errorBody().byteStream());
+				LOGGER.debug("Reply:"+replyMessage.toJSON(false));
+				LOGGER.debug("BODY: " + error);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	private void replyMessageLine(List<Message> message, String replyToken) {
 
 		ReplyMessage replyMessage = new ReplyMessage(replyToken, message);
