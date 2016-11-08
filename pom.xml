@@ -150,6 +150,19 @@
 			<artifactId>cxf-rt-frontend-jaxrs</artifactId>
 			<version>2.7.5</version>
 		</dependency>
+
+		<dependency>
+			<groupId>net.sf.sprockets</groupId>
+			<artifactId>sprockets</artifactId>
+			<version>3.1.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/junit/junit -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+		</dependency>
+
 	</dependencies>
 
 	<dependencyManagement>

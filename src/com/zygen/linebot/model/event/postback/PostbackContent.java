@@ -23,8 +23,8 @@ import lombok.Value;
 
 @Value
 public class PostbackContent {
-    private final String data;
-    private final Object params;
+    private String data;
+    private Object params;
 
     @JsonCreator
     public PostbackContent(
@@ -33,4 +33,21 @@ public class PostbackContent {
         this.data = data;
         this.params = params;
     }
+
+	public String getData() {
+		return data;
+	}
+
+	public void setData(String data) {
+		this.data = data;
+	}
+
+	public Object getParams() {
+		return params;
+	}
+
+	public void setParams(Object params) {
+		this.params = params;
+	}
+    
 }

@@ -1,6 +1,5 @@
 package com.zygen.hcp.jpa;
 
-
 import javax.persistence.*;
 import org.eclipse.persistence.annotations.Multitenant;
 import org.eclipse.persistence.annotations.TenantDiscriminatorColumn;
@@ -16,9 +15,9 @@ import static javax.persistence.TemporalType.TIMESTAMP;
 @Multitenant
 @TenantDiscriminatorColumn(name = "tenant_id", contextProperty = "me-tenant.id", length = 36)
 @NamedQuery(name = "AllUserProfile", query = "select p from UserProfile p")
-public class UserProfile  {
-//public class UserProfile implements Serializable {
-//	private static final long serialVersionUID = 1L;
+public class UserProfile {
+	// public class UserProfile implements Serializable {
+	// private static final long serialVersionUID = 1L;
 
 	public UserProfile() {
 	}
@@ -35,8 +34,8 @@ public class UserProfile  {
 	private String statusMessage;
 
 	private String status;
-	@OneToMany(targetEntity=MessageEvent.class,mappedBy = "userProfile", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn(name="userId", nullable=false, insertable=false, updatable=false)
+	@OneToMany(targetEntity = MessageEvent.class, mappedBy = "userProfile", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@JoinColumn(name = "userId", nullable = false, insertable = false, updatable = false)
 	private Collection<MessageEvent> messageEvent;
 	@Temporal(DATE)
 	private Date createDate;
@@ -51,7 +50,14 @@ public class UserProfile  {
 	private String mobile;
 	private String bloodGroup;
 	private String email;
-	
+	@Column(name = "LATITUDE", precision = 3, scale = 10)
+	private double latitude;
+	@Column(name = "LONGITUDE", precision = 3, scale = 10)
+	private double longitude;
+	@Temporal(DATE)
+	private Date locationDate;
+	private String locationTitle;
+	private int radius;
 
 	public String getPictureUrl() {
 		return pictureUrl;
@@ -179,6 +185,46 @@ public class UserProfile  {
 
 	public void setEmail(String param) {
 		this.email = param;
+	}
+
+	public double getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(double param) {
+		this.latitude = param;
+	}
+
+	public double getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(double param) {
+		this.longitude = param;
+	}
+
+	public Date getLocationDate() {
+		return locationDate;
+	}
+
+	public void setLocationDate(Date param) {
+		this.locationDate = param;
+	}
+
+	public String getLocationTitle() {
+		return locationTitle;
+	}
+
+	public void setLocationTitle(String param) {
+		this.locationTitle = param;
+	}
+
+	public int getRadius() {
+		return radius;
+	}
+
+	public void setRadius(int param) {
+		this.radius = param;
 	}
 
 }
