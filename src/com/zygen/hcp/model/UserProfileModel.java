@@ -1,11 +1,7 @@
 package com.zygen.hcp.model;
 
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 
 import javax.persistence.EntityManager;
@@ -43,13 +39,13 @@ public class UserProfileModel {
 		}
 		return user;
 	}
-	public UserProfile checkCreateUserProfileRaduis(EntityManager em, String userId, String tanantId,String channelAccessToken,int r) {
+	public UserProfile checkCreateUserProfileRaduis(EntityManager em, String userId, String tanantId,String channelAccessToken,int r, MessageEvent jpe) {
 
 		Query query = em.createQuery("SELECT p FROM UserProfile p WHERE p.userId ='" + userId+ "'");
 		UserProfile user = new UserProfile();
 		try {
 			user = (UserProfile) query.getSingleResult();
-			updateUserProfileRadius(user,channelAccessToken,userId,r);
+			updateUserProfileRadius(user,channelAccessToken,userId,r,jpe);
 			
 		} catch (NoResultException e) {
 			
@@ -159,7 +155,7 @@ public class UserProfileModel {
 		}
 		return user;
 	}
-	public UserProfile updateUserProfileRadius(UserProfile user,String channelAccessToken,String userId,int r) {
+	public UserProfile updateUserProfileRadius(UserProfile user,String channelAccessToken,String userId,int r, MessageEvent jpe) {
 		Response<UserProfileResponse> response;
 		//UserProfile user = new UserProfile();
 		try {
@@ -174,7 +170,9 @@ public class UserProfileModel {
 				user.setLastActionDate(new Date());
 				user.setUserId(userId);
 				user.setRadius(r);
-				
+				ArrayList<MessageEvent> pel = new ArrayList<MessageEvent>();
+				pel.add(jpe);
+				user.setMessageEvent(pel);
 			} else {
 				LOGGER.error(response.message());
 				//System.out.println(response.code() + " " + response.message());

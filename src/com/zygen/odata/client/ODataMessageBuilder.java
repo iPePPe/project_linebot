@@ -173,17 +173,17 @@ public class ODataMessageBuilder {
 		Set<Entry<String, Object>> entries = entry.getProperties().entrySet();
 		for (Entry<String, Object> entry1 : entries) {
 			Object value = entry1.getValue();
-			// String key = entry1.getKey();
-			// System.out.println("Key=" + key);
+			 String key = entry1.getKey();
+			 System.out.println("Key=" + key);
 			if (value instanceof String) {
 
 				// String text = value == null ? "null" : value.toString();
 				// System.out.println("Value=" + text);
 			} else if (value instanceof ODataDeltaFeed) {
-				// System.out.println("ODT");
+				 System.out.println("ODT");
 				ODataDeltaFeed feed = (ODataDeltaFeed) value;
 				List<ODataEntry> inlineEntries = feed.getEntries();
-				// System.out.println(inlineEntries.size());
+				 System.out.println(inlineEntries.size());
 				for (int i = 0; i < inlineEntries.size(); i++) {
 					buildMessage(inlineEntries.get(i).getProperties());
 
@@ -203,17 +203,17 @@ public class ODataMessageBuilder {
 		for (Entry<String, Object> entry : entries) {
 			Object value = entry.getValue();
 			String key = entry.getKey();
-			System.out.println("Key:" + key);
+			//System.out.println("Key:" + key);
 			if (value instanceof Map) {
-				System.out.println("Map");
+				//ystem.out.println("Map");
 				handleEntry((Map<String, Object>) value);
 			} else if (value instanceof Calendar) {
-				System.out.println("Cal");
+				//System.out.println("Cal");
 				Calendar cal = (Calendar) value;
 				value = SimpleDateFormat.getInstance().format(cal.getTime());
 
 			} else if (value instanceof ODataDeltaFeed) {
-				System.out.println("ODF");
+				//System.out.println("ODF");
 				ODataDeltaFeed feed = (ODataDeltaFeed) value;
 				List<ODataEntry> inlineEntries = feed.getEntries();
 
@@ -223,7 +223,7 @@ public class ODataMessageBuilder {
 			} else {
 				System.out.println("Else");
 				String text = entry.getValue() == null ? "null" : entry.getValue().toString();
-				System.out.println("Value=" + text);
+				//System.out.println("Value=" + text);
 				if (key.equals("EvString")) {
 
 				} else if (key.equals("HeaderToDetailNav")) {
@@ -239,9 +239,11 @@ public class ODataMessageBuilder {
 
 		//List<Message> msg = new ArrayList<Message>();
 		String type = (String) properties.get("Type");
+		//System.out.println(type);
 		if (type.equals("text")) {
 			TextMessage textMessage = new TextMessage((String) properties.get("F1"));
 			message.add(textMessage);
+			//System.out.println((String) properties.get("F1"));
 
 		} else if (type.equals("sticker")) {
 			StickerMessage sticker = new StickerMessage((String) properties.get("F1"), (String) properties.get("F2"));

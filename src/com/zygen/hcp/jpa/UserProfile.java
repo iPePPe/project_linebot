@@ -10,6 +10,7 @@ import java.util.Date;
 import static javax.persistence.TemporalType.DATE;
 import static javax.persistence.TemporalType.TIMESTAMP;
 
+
 @Entity
 @Table(name = "UserProfile")
 @Multitenant
@@ -58,6 +59,7 @@ public class UserProfile {
 	private Date locationDate;
 	private String locationTitle;
 	private int radius;
+
 
 	public String getPictureUrl() {
 		return pictureUrl;
@@ -226,5 +228,7 @@ public class UserProfile {
 	public void setRadius(int param) {
 		this.radius = param;
 	}
+
+
 
 }

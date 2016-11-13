@@ -68,6 +68,7 @@ import com.zygen.linebot.model.ReplyMessage;
 import com.zygen.linebot.model.action.Action;
 import com.zygen.linebot.model.action.MessageAction;
 import com.zygen.linebot.model.action.PostbackAction;
+import com.zygen.linebot.model.action.URIAction;
 import com.zygen.linebot.model.event.BeaconEvent;
 import com.zygen.linebot.model.event.CallbackRequest;
 import com.zygen.hcp.jpa.JPAEntityFactoryManager;
@@ -96,6 +97,7 @@ public class CallbackHCPServlet extends HttpServlet {
 	public static final String PERSISTENCE_UNIT_NAME = "persistence-linebot";
 	private static final String lineapi = "line-api";
 	private static final DestinationUtil dest = new DestinationUtil(lineapi);
+	private static String hcpUrl = "";
 	// private InitialContext ctx;
 
 	private EntityManagerFactory emf;
@@ -143,7 +145,7 @@ public class CallbackHCPServlet extends HttpServlet {
 		// TODO Auto-generated method stub
 		try {
 
-			response.getWriter().print("PePPe OData2..." + this.getCurrentTenantId());
+			response.getWriter().print("PePPe Nice Place6..." + this.getCurrentTenantId());
 		} catch (NamingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -159,11 +161,20 @@ public class CallbackHCPServlet extends HttpServlet {
 			throws ServletException, IOException {
 		try {
 			// response.getWriter().println("parser");
+			hcpUrl = getBaseUrl(request);
 			doParser(request, response);
 		} catch (Exception e) {
 			response.getWriter().println("parser error: " + e.getMessage());
 			LOGGER.error("Parser Error", e);
 		}
+	}
+
+	public static String getBaseUrl(HttpServletRequest request) {
+		String scheme = request.getScheme() + "://";
+		String serverName = request.getServerName();
+		String serverPort = (request.getServerPort() == 80) ? "" : ":" + request.getServerPort();
+		String contextPath = request.getContextPath();
+		return scheme + serverName + serverPort + contextPath;
 	}
 
 	public void doParser(HttpServletRequest request, HttpServletResponse response)
@@ -276,21 +287,22 @@ public class CallbackHCPServlet extends HttpServlet {
 
 					if (user.getLatitude() == 0) {
 						TemplateMessage locationTemplate = createLocation("Check-In");
-						reply((Message)locationTemplate,messageEvent.getReplyToken());
+						reply((Message) locationTemplate, messageEvent.getReplyToken());
 					} else if (user.getRadius() == 0) {
 						TemplateMessage rediusTemplate = createRadius("Raduis");
-						reply((Message)rediusTemplate,messageEvent.getReplyToken());
+						reply((Message) rediusTemplate, messageEvent.getReplyToken());
 					} else {
-						if(textContent.getText().equals("#r")||
-							textContent.getText().equals("#R")){
+						if (textContent.getText().substring(0, 2).equals("#r") || textContent.getText().substring(0, 2).equals("#R")) {
 							TemplateMessage rediusTemplate = createRadius("Raduis");
-							reply((Message)rediusTemplate,messageEvent.getReplyToken());
-						}else{
-							//replyLine(new TextMessage(nearbySearch(textContent.getText(), user)),
-							//		messageEvent.getReplyToken());
-							reply(nearbySearch(textContent.getText(), user),messageEvent.getReplyToken());
+							reply((Message) rediusTemplate, messageEvent.getReplyToken());
+						} else {
+
+							reply(nearbySearch(textContent.getText(), user), messageEvent.getReplyToken());
 						}
 					}
+
+					// reply(nearbySearch(textContent.getText(), user),
+					// messageEvent.getReplyToken());
 
 				} else if (message instanceof StickerMessageContent) {
 					StickerMessageContent stkContent = (StickerMessageContent) message;
@@ -312,7 +324,12 @@ public class CallbackHCPServlet extends HttpServlet {
 					me.setType(locationMessage.getType());
 					user = upm.checkUserProfileLocation(em, event.getSource().getUserId(), this.getCurrentTenantId(),
 							dest.getChannelAccessToken(), me);
-					replyLine(new TextMessage(user.getDisplayName()+"@"+user.getLocationTitle()), messageEvent.getReplyToken());
+					if (!(user.getLocationTitle() == null)) {
+						replyLine(new TextMessage(user.getDisplayName() + "@" + user.getLocationTitle()),
+								messageEvent.getReplyToken());
+					} else {
+						replyLine(new TextMessage("Share location again"), me.getReplyToken());
+					}
 
 				} else if (message instanceof AudioMessageContent) {
 					AudioMessageContent auContent = (AudioMessageContent) message;
@@ -350,17 +367,24 @@ public class CallbackHCPServlet extends HttpServlet {
 			} else if (event instanceof BeaconEvent) {
 
 			} else if (event instanceof PostbackEvent) {
-				PostbackEvent pe = (PostbackEvent)event;
+				PostbackEvent pe = (PostbackEvent) event;
+				com.zygen.hcp.jpa.MessageEvent jpe = new com.zygen.hcp.jpa.MessageEvent();
+				
 				PostbackContent postback = pe.getPostbackContent();
 				String data = postback.getData();
 				String[] parts = data.split("-");
 				String part1 = parts[0]; // 004
 				String part2 = parts[1]; // 034556
-				if (part1.equals("#r")){
+				jpe.setReplyToken(pe.getReplyToken());
+				jpe.setTimestamp(Date.from(pe.getTimestamp()));
+				jpe.setType("postback");
+				jpe.setPostbackData(postback.getData());
+				jpe.setUserId(pe.getSource().getUserId());
+				if (part1.equals("#r")) {
 
 					user = upm.checkCreateUserProfileRaduis(em, pe.getSource().getUserId(), this.getCurrentTenantId(),
-							dest.getChannelAccessToken() ,Integer.parseInt(part2));
-					replyLine(new TextMessage("Radius = "+ part2 +"m"), pe.getReplyToken());
+							dest.getChannelAccessToken(), Integer.parseInt(part2),jpe);
+					replyLine(new TextMessage("Radius = " + part2 + "m"), pe.getReplyToken());
 				}
 			} else if (event instanceof UnknownEvent) {
 
@@ -373,7 +397,8 @@ public class CallbackHCPServlet extends HttpServlet {
 			em.close();
 		}
 	}
-	private String nearbySearch(String keyword, UserProfile user,int from,int to) {
+
+	private String nearbySearch(String keyword, UserProfile user, int from, int to) {
 		// TODO Auto-generated method stub
 		net.sf.sprockets.google.Places.Response<List<Place>> response;
 		String result = "";
@@ -385,8 +410,8 @@ public class CallbackHCPServlet extends HttpServlet {
 			List<Place> places = response.getResult();
 
 			if (STATUS_OK.equals(status)) {
-				for (int i=from ; i<= to ; i++){
-					
+				for (int i = from; i <= to; i++) {
+
 				}
 				for (Place place : places) {
 					// System.out.println(place.getName() + " @ " +
@@ -406,53 +431,77 @@ public class CallbackHCPServlet extends HttpServlet {
 		}
 		return result;
 	}
-	private Message nearbySearch(String keyword, UserProfile user) {
+
+	private List<Message> nearbySearch(String keyword, UserProfile user) {
 		// TODO Auto-generated method stub
 		net.sf.sprockets.google.Places.Response<List<Place>> response;
-		String result = "";
-		Message message = null;
-		try {
-			response = Places.nearbySearch(Params.create().latitude(user.getLatitude()).longitude(user.getLongitude())
-					.radius(user.getRadius()).keyword(keyword));
 
+		List<Message> messages = new ArrayList<Message>();
+		try {
+
+			if (user.getLatitude() > 0 && user.getRadius() > 0) {
+				response = Places.nearbySearch(Params.create().latitude(user.getLatitude())
+						.longitude(user.getLongitude()).radius(user.getRadius()).keyword(keyword));
+			} else if (user.getLatitude() > 0 && user.getRadius() == 0) {
+				response = Places.nearbySearch(Params.create().latitude(user.getLatitude())
+						.longitude(user.getLongitude()).radius(2000).keyword(keyword));
+			} else {
+				response = Places.nearbySearch(Params.create().radius(2000).keyword(keyword));
+			}
 			String status = response.getStatus();
 			List<Place> places = response.getResult();
-			ArrayList<Action> actions = new ArrayList<Action>();
+
 			if (STATUS_OK.equals(status)) {
-				if (places.size() <= 4){
-					for (Place place : places) {
-						// System.out.println(place.getName() + " @ " +
-						// place.getVicinity()+"\n");
-						//result += place.getName() + " @ " + place.getVicinity() + "\n";
-						PostbackAction action = new PostbackAction(place.getName(), "#s-"+place.getPlaceId());
-						actions.add(action);
-					}
-					
-				}else{
-					for (int i = 0 ; i<=3 ; i++){
-						PostbackAction action = new PostbackAction(places.get(i).getName(), "#s-"+places.get(i).getPlaceId());
-						actions.add(action);
-					}
-					PostbackAction nextAction = new PostbackAction("Next","#next-3");
-					actions.add(nextAction);
+				int y = places.size();
+				if (y >= 5) {
+					y = 5;
+				} else {
+					y = places.size();
 				}
-				ButtonsTemplate button = createButtion(places.get(0).getIcon(),
-						places.get(0).getTypes().get(0), "Choose your place", actions);
-				message = (Message) new TemplateMessage(keyword, (Template) button);
+				if (y > 0) {
+					int i = 0;
+					do {
+						ArrayList<Action> actions = new ArrayList<Action>();
+						net.sf.sprockets.google.Places.Response<Place> details = Places
+								.details(Params.create().placeId(places.get(i).getPlaceId().getId()));
+
+						if (details.getResult().getUrl() != null) {
+							URIAction mapAction = new URIAction("Detail", details.getResult().getUrl());
+							actions.add(mapAction);
+						}
+						if (details.getResult().getWebsite() != null) {
+							URIAction urlAction = new URIAction("Website", details.getResult().getWebsite());
+							actions.add(urlAction);
+						}
+						String imageUrl = hcpUrl + "/PlaceImageServlet?placeId=" + places.get(i).getPlaceId().getId();
+						ButtonsTemplate button = createButtion(imageUrl, places.get(i).getName().substring(0, 40),
+								places.get(i).getTypes().get(0) + " Rating :" + places.get(i).getRating(), actions);
+
+						Message message = (Message) new TemplateMessage(keyword, (Template) button);
+						if (message != null) {
+							messages.add(message);
+						}
+						i++;
+					} while (i < y);
+
+				}
+
 			} else if (STATUS_ZERO_RESULTS.equals(status)) {
 				// System.out.println("no results");
-				result = "no results";
-				message = (Message) new TextMessage(result);
+
+				messages.add((Message) new TextMessage("No data"));
 			} else {
 				// System.out.println("error: " + status);
-				message = (Message) new TextMessage(result);
+				// message = (Message) new TextMessage(result);
+				messages.add((Message) new TextMessage("No data"));
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return message;
+		return messages;
 	}
+
 	private TemplateMessage createRadius(String altText) {
 		// TODO Auto-generated method stub
 		// Template template = new Template();
@@ -462,9 +511,11 @@ public class CallbackHCPServlet extends HttpServlet {
 		PostbackAction r2000 = new PostbackAction("2 km", "#r-2000");
 		PostbackAction r5000 = new PostbackAction("5 km", "#r-5000");
 		ButtonsTemplate button = createButtion("https://dl.dropboxusercontent.com/u/57992228/nice/radius.png",
-				"Set Radius", "Please select your prefer radius or type #r-xxxxx", Arrays.asList(r0500,r1000,r2000,r5000));
+				"Set Radius", "Please select your prefer radius or type #r-xxxxx",
+				Arrays.asList(r0500, r1000, r2000, r5000));
 		return new TemplateMessage(altText, (Template) button);
 	}
+
 	private TemplateMessage createLocation(String altText) {
 		// TODO Auto-generated method stub
 		// Template template = new Template();
@@ -473,7 +524,7 @@ public class CallbackHCPServlet extends HttpServlet {
 				"Check-In", "Please check-in your locatin", Arrays.asList(ok));
 		return new TemplateMessage(altText, (Template) button);
 	}
-	
+
 	private TemplateMessage createWelcome(String altText) {
 		// TODO Auto-generated method stub
 		// Template template = new Template();
@@ -540,12 +591,16 @@ public class CallbackHCPServlet extends HttpServlet {
 	}
 
 	private void reply(Message message, String tokenReply) {
+		reply(Arrays.asList(message), tokenReply);
+	}
+
+	private void reply(List<Message> message, String tokenReply) {
 
 		Response<BotApiResponse> res;
 		ReplyMessage replyMessage;
 		try {
 
-			replyMessage = new ReplyMessage(tokenReply, Arrays.asList(message));
+			replyMessage = new ReplyMessage(tokenReply, message);
 			res = LineMessagingServiceBuilder.create(dest.getChannelAccessToken()).build().replyMessage(replyMessage)
 					.execute();
 			if (res.code() != 200) {

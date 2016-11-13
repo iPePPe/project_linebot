@@ -25,14 +25,16 @@ public class PlacesTest {
 	public static void main(String[] args) throws IOException {
         System.out.println("Hello World!"); // Display the string.
         Response<List<Place>> resp = Places.nearbySearch(
-				Params.create().latitude(13.909487).longitude(100.588296).keyword("พิซซ่า"));
+				Params.create().latitude(13.909487).longitude(100.588296).keyword("ตำจังโก้"));
         
         String status = resp.getStatus();
         List<Place> places = resp.getResult();
         
         if (STATUS_OK.equals(status)) {
             for (Place place : places) {
+            	Response<Place> details = Places.details(Params.create().placeId(place.getPlaceId().getId()));
                 System.out.println(place.getName() + " @ " + place.getVicinity());
+                System.out.println(details.getResult().getUrl());
             }
         } else if (STATUS_ZERO_RESULTS.equals(status)) {
             System.out.println("no results");
