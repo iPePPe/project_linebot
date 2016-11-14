@@ -306,9 +306,6 @@ public class CallbackHCPServlet extends HttpServlet {
 						}
 					}
 
-					// reply(nearbySearch(textContent.getText(), user),
-					// messageEvent.getReplyToken());
-
 				} else if (message instanceof StickerMessageContent) {
 					StickerMessageContent stkContent = (StickerMessageContent) message;
 
@@ -327,7 +324,7 @@ public class CallbackHCPServlet extends HttpServlet {
 					me.setTitle(locationMessage.getTitle());
 					me.setAddress(locationMessage.getAddress());
 					me.setType(locationMessage.getType());
-					user = upm.checkUserProfileLocation(em, event.getSource().getUserId(), this.getCurrentTenantId(),
+					user = upm.checkUserProfileLocation(em,  this.getCurrentTenantId(),
 							dest.getChannelAccessToken(), me);
 					if (!(user.getLocationTitle() == null)) {
 						replyLine(new TextMessage(user.getDisplayName() + "@" + user.getLocationTitle()),
@@ -394,7 +391,7 @@ public class CallbackHCPServlet extends HttpServlet {
 				jpe.setUserId(pe.getSource().getUserId());
 				if (part1.equals("#r")) {
 
-					user = upm.checkCreateUserProfileRaduis(em, pe.getSource().getUserId(), this.getCurrentTenantId(),
+					user = upm.checkCreateUserProfileRaduis(em,  this.getCurrentTenantId(),
 							dest.getChannelAccessToken(), Integer.parseInt(part2), jpe);
 					replyLine(new TextMessage("Radius = " + part2 + "m"), pe.getReplyToken());
 				}
@@ -413,42 +410,11 @@ public class CallbackHCPServlet extends HttpServlet {
 		}
 	}
 
-	private String nearbySearch(String keyword, UserProfile user, int from, int to) {
-		// TODO Auto-generated method stub
-		net.sf.sprockets.google.Places.Response<List<Place>> response;
-		String result = "";
-		try {
-			response = Places.nearbySearch(Params.create().latitude(user.getLatitude()).longitude(user.getLongitude())
-					.radius(user.getRadius()).keyword(keyword));
 
-			String status = response.getStatus();
-			List<Place> places = response.getResult();
-
-			if (STATUS_OK.equals(status)) {
-				for (int i = from; i <= to; i++) {
-
-				}
-				for (Place place : places) {
-					// System.out.println(place.getName() + " @ " +
-					// place.getVicinity()+"\n");
-					result += place.getName() + " @ " + place.getVicinity() + "\n";
-				}
-			} else if (STATUS_ZERO_RESULTS.equals(status)) {
-				// System.out.println("no results");
-				result = "no results";
-			} else {
-				// System.out.println("error: " + status);
-				result = "no results";
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return result;
-	}
 
 	private List<Message> nearbySearch(String keyword, UserProfile user, EntityManager em) {
 		// TODO Auto-generated method stub
+
 		net.sf.sprockets.google.Places.Response<List<Place>> response;
 		String rankBy = user.getRankby();
 		nices.clear();
@@ -581,9 +547,10 @@ public class CallbackHCPServlet extends HttpServlet {
 	private TemplateMessage createLocation(String altText) {
 		// TODO Auto-generated method stub
 		// Template template = new Template();
-		PostbackAction ok = new PostbackAction("OK", "OK");
+		ArrayList<Action> actions = new ArrayList<Action>();
+
 		ButtonsTemplate button = createButtion("https://dl.dropboxusercontent.com/u/57992228/nice/sharelocation.png",
-				"Check-In", "Please check-in your locatin", Arrays.asList(ok));
+				"Check-In", "Please check-in your locatin",actions);
 		return new TemplateMessage(altText, (Template) button);
 	}
 

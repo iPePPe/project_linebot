@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +20,6 @@ public class UserProfileModel {
 	private static final Logger LOGGER = LoggerFactory.getLogger(UserProfileModel.class);
 
 	public UserProfile checkCreateUserProfile(EntityManager em, String tanantId,String channelAccessToken,MessageEvent me) {
-
-		//Query query = em.createQuery("SELECT p FROM UserProfile p WHERE p.userId ='" + userId+ "'");
 		UserProfile user = em.find(UserProfile.class, me.getUserId());
 		if(user != null){
 			
@@ -31,52 +27,35 @@ public class UserProfileModel {
 		}else{
 			user = getUserProfile(channelAccessToken,me.getUserId());
 		}
-/*		try {
-			
-			user = (UserProfile) query.getSingleResult();
-			updateUserProfile(user,channelAccessToken,userId,me);
-			
-		} catch (NoResultException e) {
-			
-
-			user = getUserProfile(channelAccessToken,userId,me);
-			
-			
-		}*/
 		return user;
 	}
-	public UserProfile checkCreateUserProfileRaduis(EntityManager em, String userId, String tanantId,String channelAccessToken,int r, MessageEvent jpe) {
+	public UserProfile checkCreateUserProfileRaduis(EntityManager em,  String tanantId,String channelAccessToken,int r, MessageEvent jpe) {
 
-		Query query = em.createQuery("SELECT p FROM UserProfile p WHERE p.userId ='" + userId+ "'");
-		UserProfile user = new UserProfile();
-		try {
-			user = (UserProfile) query.getSingleResult();
-			updateUserProfileRadius(user,channelAccessToken,userId,r,jpe);
+		//Query query = em.createQuery("SELECT p FROM UserProfile p WHERE p.userId ='" + userId+ "'");
+		UserProfile user = em.find(UserProfile.class, jpe.getUserId());
+		if(user != null){
 			
-		} catch (NoResultException e) {
-			
-
-			user = getUserProfile(channelAccessToken,userId);
-			
-			
+			user = updateUserProfile(user,channelAccessToken,jpe);
+			user.setRadius(r);
+		}else{
+			user = getUserProfile(channelAccessToken,jpe.getUserId());
 		}
 		return user;
 	}
-	public UserProfile checkUserProfileLocation(EntityManager em, String userId, String tanantId,String channelAccessToken,MessageEvent me) {
+	public UserProfile checkUserProfileLocation(EntityManager em,  String tanantId,String channelAccessToken,MessageEvent me) {
 		
-		Query query = em.createQuery("SELECT p FROM UserProfile p WHERE p.userId ='" + userId+ "'");
-		UserProfile user = new UserProfile();
-		try {
-			user = (UserProfile) query.getSingleResult();
-			updateUserLocation(user,channelAccessToken,userId,me);
-
-		} catch (NoResultException e) {
+		UserProfile user = em.find(UserProfile.class, me.getUserId());
+		if(user != null){
 			
-
-			user = getUserProfile(channelAccessToken,userId,me);
-			
-			
+			user = updateUserLocation(user,channelAccessToken,me);
+			user.setLocationDate(new Date());
+			user.setLatitude(me.getLatitude());
+			user.setLongitude(me.getLongitude());
+			user.setLocationTitle(me.getAddress());
+		}else{
+			user = getUserProfile(channelAccessToken,me.getUserId());
 		}
+
 		return user;
 	}
 	public UserProfile getUserProfile(String channelAccessToken,String userId) {
@@ -105,38 +84,12 @@ public class UserProfileModel {
 		}
 		return user;
 	}
-	public UserProfile getUserProfile(String channelAccessToken,String userId,MessageEvent me) {
-		Response<UserProfileResponse> response;
-		UserProfile user = new UserProfile();
-		try {
-			response = LineMessagingServiceBuilder.create(channelAccessToken).build().getProfile(userId)
-					.execute();
+	public UserProfile getUserProfile(String channelAccessToken,MessageEvent me) {
 
-			if (response.isSuccessful()) {
-				UserProfileResponse profile = response.body();
-				user.setDisplayName(profile.getDisplayName());
-				user.setPictureUrl(profile.getPictureUrl());
-				user.setStatusMessage(profile.getStatusMessage());
-				user.setStatus("New");
-				user.setCreateDate(new Date());
-				user.setUserId(userId);
-				ArrayList<MessageEvent> mel = new ArrayList<MessageEvent>();
-				mel.add(me);
-				user.setMessageEvent(mel);
-
-			} else {
-				LOGGER.error(response.message());
-				//System.out.println(response.code() + " " + response.message());
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return user;
+		return getUserProfile(channelAccessToken,me.getUserId());
 	}
 	public UserProfile updateUserProfile(UserProfile user,String channelAccessToken,MessageEvent me) {
 		Response<UserProfileResponse> response;
-		//UserProfile user = new UserProfile();
 		try {
 			response = LineMessagingServiceBuilder.create(channelAccessToken).build().getProfile(me.getUserId())
 					.execute();
@@ -161,63 +114,22 @@ public class UserProfileModel {
 		}
 		return user;
 	}
-	public UserProfile updateUserProfileRadius(UserProfile user,String channelAccessToken,String userId,int r, MessageEvent jpe) {
-		Response<UserProfileResponse> response;
-		//UserProfile user = new UserProfile();
-		try {
-			response = LineMessagingServiceBuilder.create(channelAccessToken).build().getProfile(userId)
-					.execute();
+	public UserProfile updateUserProfileRadius(UserProfile user,String channelAccessToken,int r, MessageEvent jpe) {
+		
+		user = updateUserProfile(user,channelAccessToken,jpe);
+		user.setRadius(r);
 
-			if (response.isSuccessful()) {
-				UserProfileResponse profile = response.body();
-				user.setDisplayName(profile.getDisplayName());
-				user.setPictureUrl(profile.getPictureUrl());
-				user.setStatusMessage(profile.getStatusMessage());
-				user.setLastActionDate(new Date());
-				user.setUserId(userId);
-				user.setRadius(r);
-				ArrayList<MessageEvent> pel = new ArrayList<MessageEvent>();
-				pel.add(jpe);
-				user.setMessageEvent(pel);
-			} else {
-				LOGGER.error(response.message());
-				//System.out.println(response.code() + " " + response.message());
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		return user;
 	}
-	public UserProfile updateUserLocation(UserProfile user,String channelAccessToken,String userId,MessageEvent me) {
-		Response<UserProfileResponse> response;
-		//UserProfile user = new UserProfile();
-		try {
-			response = LineMessagingServiceBuilder.create(channelAccessToken).build().getProfile(userId)
-					.execute();
-
-			if (response.isSuccessful()) {
-				UserProfileResponse profile = response.body();
-				user.setDisplayName(profile.getDisplayName());
-				user.setPictureUrl(profile.getPictureUrl());
-				user.setStatusMessage(profile.getStatusMessage());
-				user.setLastActionDate(new Date());
-				user.setUserId(userId);
-				user.setLatitude(me.getLatitude());
-				user.setLongitude(me.getLongitude());
-				user.setLocationDate(new Date());
-				user.setLocationTitle(me.getAddress());
-				ArrayList<MessageEvent> mel = new ArrayList<MessageEvent>();
-				mel.add(me);
-				user.setMessageEvent(mel);
-			} else {
-				LOGGER.error(response.message());
-				//System.out.println(response.code() + " " + response.message());
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public UserProfile updateUserLocation(UserProfile user,String channelAccessToken,MessageEvent me) {
+		
+		user = updateUserProfile(user,channelAccessToken,me);
+		user.setUserId(me.getUserId());
+		user.setLatitude(me.getLatitude());
+		user.setLongitude(me.getLongitude());
+		user.setLocationDate(new Date());
+		user.setLocationTitle(me.getAddress());
+		
 		return user;
 	}
 }
