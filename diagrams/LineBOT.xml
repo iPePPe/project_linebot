@@ -2,7 +2,7 @@
 	<entity>
 		<entity-name>com.zygen.hcp.jpa.UserProfile</entity-name>
 		<entity-width>120</entity-width>
-		<entity-height>506</entity-height>
+		<entity-height>526</entity-height>
 		<entity-X-Coordinate>78</entity-X-Coordinate>
 		<entity-Y-Coordinate>40</entity-Y-Coordinate>
 		<primary-collapsed>false</primary-collapsed>
@@ -16,6 +16,17 @@
 		<entity-height>466</entity-height>
 		<entity-X-Coordinate>258</entity-X-Coordinate>
 		<entity-Y-Coordinate>89</entity-Y-Coordinate>
+		<primary-collapsed>false</primary-collapsed>
+		<relation-collapsed>false</relation-collapsed>
+		<basic-collapsed>false</basic-collapsed>
+	</entity>
+
+	<entity>
+		<entity-name>com.zygen.hcp.jpa.NicePlace</entity-name>
+		<entity-width>120</entity-width>
+		<entity-height>368</entity-height>
+		<entity-X-Coordinate>440</entity-X-Coordinate>
+		<entity-Y-Coordinate>110</entity-Y-Coordinate>
 		<primary-collapsed>false</primary-collapsed>
 		<relation-collapsed>false</relation-collapsed>
 		<basic-collapsed>false</basic-collapsed>

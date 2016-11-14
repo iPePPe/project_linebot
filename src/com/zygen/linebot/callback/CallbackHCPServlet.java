@@ -72,6 +72,7 @@ import com.zygen.linebot.model.action.URIAction;
 import com.zygen.linebot.model.event.BeaconEvent;
 import com.zygen.linebot.model.event.CallbackRequest;
 import com.zygen.hcp.jpa.JPAEntityFactoryManager;
+import com.zygen.hcp.jpa.NicePlace;
 import com.zygen.hcp.jpa.UserProfile;
 import com.zygen.hcp.model.UserProfileModel;
 import com.zygen.linebot.client.DestinationUtil;
@@ -84,6 +85,7 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Servlet implementation class CallBackServletd
@@ -101,6 +103,7 @@ public class CallbackHCPServlet extends HttpServlet {
 	// private InitialContext ctx;
 
 	private EntityManagerFactory emf;
+	private ArrayList<NicePlace> nices = new ArrayList<NicePlace>();
 
 	public CallbackHCPServlet() {
 
@@ -244,6 +247,7 @@ public class CallbackHCPServlet extends HttpServlet {
 		EntityManager em = emf.createEntityManager();
 		UserProfileModel upm = new UserProfileModel();
 		UserProfile user = new UserProfile();
+
 		em.getTransaction().begin();
 		em.setProperty("me-tenant.id", this.getCurrentTenantId());
 		try {
@@ -282,7 +286,7 @@ public class CallbackHCPServlet extends HttpServlet {
 					 * else { replyLine(new TextMessage("I don't know"),
 					 * messageEvent.getReplyToken()); } }
 					 */
-					user = upm.checkCreateUserProfile(em, event.getSource().getUserId(), this.getCurrentTenantId(),
+					user = upm.checkCreateUserProfile(em, this.getCurrentTenantId(),
 							dest.getChannelAccessToken(), me);
 
 					if (user.getLatitude() == 0) {
@@ -292,12 +296,13 @@ public class CallbackHCPServlet extends HttpServlet {
 						TemplateMessage rediusTemplate = createRadius("Raduis");
 						reply((Message) rediusTemplate, messageEvent.getReplyToken());
 					} else {
-						if (textContent.getText().substring(0, 2).equals("#r") || textContent.getText().substring(0, 2).equals("#R")) {
+						if (textContent.getText().substring(0, 2).equals("#r")
+								|| textContent.getText().substring(0, 2).equals("#R")) {
 							TemplateMessage rediusTemplate = createRadius("Raduis");
 							reply((Message) rediusTemplate, messageEvent.getReplyToken());
 						} else {
 
-							reply(nearbySearch(textContent.getText(), user), messageEvent.getReplyToken());
+							reply(nearbySearch(textContent.getText(), user, em), messageEvent.getReplyToken());
 						}
 					}
 
@@ -311,7 +316,7 @@ public class CallbackHCPServlet extends HttpServlet {
 					me.setType(stkContent.getType());
 					me.setPackageId(stkContent.getPackageId());
 					me.setStickerId(stkContent.getStickerId());
-					user = upm.checkCreateUserProfile(em, event.getSource().getUserId(), this.getCurrentTenantId(),
+					user = upm.checkCreateUserProfile(em, this.getCurrentTenantId(),
 							dest.getChannelAccessToken(), me);
 
 				} else if (message instanceof LocationMessageContent) {
@@ -336,7 +341,7 @@ public class CallbackHCPServlet extends HttpServlet {
 					me.setMessageId(auContent.getId());
 					me.setType(auContent.getType());
 					me.setUrl(auContent.getUrl());
-					user = upm.checkCreateUserProfile(em, event.getSource().getUserId(), this.getCurrentTenantId(),
+					user = upm.checkCreateUserProfile(em, this.getCurrentTenantId(),
 							dest.getChannelAccessToken(), me);
 
 				} else if (message instanceof ImageMessageContent) {
@@ -344,7 +349,7 @@ public class CallbackHCPServlet extends HttpServlet {
 					me.setMessageId(imageContent.getId());
 					me.setType(imageContent.getType());
 					me.setUrl(imageContent.getUrl());
-					user = upm.checkCreateUserProfile(em, event.getSource().getUserId(), this.getCurrentTenantId(),
+					user = upm.checkCreateUserProfile(em, this.getCurrentTenantId(),
 							dest.getChannelAccessToken(), me);
 
 				} else if (message instanceof VideoMessageContent) {
@@ -352,7 +357,7 @@ public class CallbackHCPServlet extends HttpServlet {
 					me.setMessageId(vContent.getId());
 					me.setType(vContent.getType());
 					me.setUrl(vContent.getUrl());
-					user = upm.checkCreateUserProfile(em, event.getSource().getUserId(), this.getCurrentTenantId(),
+					user = upm.checkCreateUserProfile(em,  this.getCurrentTenantId(),
 							dest.getChannelAccessToken(), me);
 
 				}
@@ -361,7 +366,14 @@ public class CallbackHCPServlet extends HttpServlet {
 			} else if (event instanceof FollowEvent) {
 
 			} else if (event instanceof JoinEvent) {
-
+				JoinEvent je = (JoinEvent)event;
+				com.zygen.hcp.jpa.MessageEvent jpe = new com.zygen.hcp.jpa.MessageEvent();
+				jpe.setReplyToken(je.getReplyToken());
+				jpe.setTimestamp(Date.from(je.getTimestamp()));
+				jpe.setType("join");
+				jpe.setUserId(je.getSource().getUserId());
+				user = upm.checkCreateUserProfile(em,  this.getCurrentTenantId(),
+						dest.getChannelAccessToken(), jpe);
 			} else if (event instanceof LeaveEvent) {
 
 			} else if (event instanceof BeaconEvent) {
@@ -369,7 +381,7 @@ public class CallbackHCPServlet extends HttpServlet {
 			} else if (event instanceof PostbackEvent) {
 				PostbackEvent pe = (PostbackEvent) event;
 				com.zygen.hcp.jpa.MessageEvent jpe = new com.zygen.hcp.jpa.MessageEvent();
-				
+
 				PostbackContent postback = pe.getPostbackContent();
 				String data = postback.getData();
 				String[] parts = data.split("-");
@@ -383,13 +395,16 @@ public class CallbackHCPServlet extends HttpServlet {
 				if (part1.equals("#r")) {
 
 					user = upm.checkCreateUserProfileRaduis(em, pe.getSource().getUserId(), this.getCurrentTenantId(),
-							dest.getChannelAccessToken(), Integer.parseInt(part2),jpe);
+							dest.getChannelAccessToken(), Integer.parseInt(part2), jpe);
 					replyLine(new TextMessage("Radius = " + part2 + "m"), pe.getReplyToken());
 				}
 			} else if (event instanceof UnknownEvent) {
 
 			}
 			em.persist(user);
+			for (NicePlace nice : nices) {
+				em.persist(nice);
+			}
 			em.getTransaction().commit();
 		} catch (Exception e) {
 			LOGGER.error("DB Error " + e.getMessage());
@@ -432,59 +447,94 @@ public class CallbackHCPServlet extends HttpServlet {
 		return result;
 	}
 
-	private List<Message> nearbySearch(String keyword, UserProfile user) {
+	private List<Message> nearbySearch(String keyword, UserProfile user, EntityManager em) {
 		// TODO Auto-generated method stub
 		net.sf.sprockets.google.Places.Response<List<Place>> response;
-
+		String rankBy = user.getRankby();
+		nices.clear();
+		if (rankBy == null) {
+			rankBy = Params.RANK_BY_PROMINENCE;
+		}
 		List<Message> messages = new ArrayList<Message>();
 		try {
 
 			if (user.getLatitude() > 0 && user.getRadius() > 0) {
 				response = Places.nearbySearch(Params.create().latitude(user.getLatitude())
-						.longitude(user.getLongitude()).radius(user.getRadius()).keyword(keyword));
+						.longitude(user.getLongitude()).radius(user.getRadius()).keyword(keyword).rankBy(rankBy));
 			} else if (user.getLatitude() > 0 && user.getRadius() == 0) {
 				response = Places.nearbySearch(Params.create().latitude(user.getLatitude())
-						.longitude(user.getLongitude()).radius(2000).keyword(keyword));
+						.longitude(user.getLongitude()).radius(2000).keyword(keyword).rankBy(rankBy));
 			} else {
-				response = Places.nearbySearch(Params.create().radius(2000).keyword(keyword));
+				response = Places.nearbySearch(Params.create().radius(2000).keyword(keyword).rankBy(rankBy));
 			}
 			String status = response.getStatus();
 			List<Place> places = response.getResult();
 
 			if (STATUS_OK.equals(status)) {
 				int y = places.size();
-				if (y >= 5) {
-					y = 5;
+				if (y >= 4) {
+					y = 4;
 				} else {
 					y = places.size();
 				}
-				if (y > 0) {
-					int i = 0;
-					do {
+				int i = 0;
+				for (Place place : places) {
+					net.sf.sprockets.google.Places.Response<Place> details = Places
+							.details(Params.create().placeId(place.getPlaceId().getId()));
+					
+					if(i<=y) {
+
 						ArrayList<Action> actions = new ArrayList<Action>();
-						net.sf.sprockets.google.Places.Response<Place> details = Places
-								.details(Params.create().placeId(places.get(i).getPlaceId().getId()));
 
 						if (details.getResult().getUrl() != null) {
 							URIAction mapAction = new URIAction("Detail", details.getResult().getUrl());
 							actions.add(mapAction);
+
 						}
 						if (details.getResult().getWebsite() != null) {
 							URIAction urlAction = new URIAction("Website", details.getResult().getWebsite());
 							actions.add(urlAction);
 						}
-						String imageUrl = hcpUrl + "/PlaceImageServlet?placeId=" + places.get(i).getPlaceId().getId();
-						ButtonsTemplate button = createButtion(imageUrl, places.get(i).getName().substring(0, 40),
-								places.get(i).getTypes().get(0) + " Rating :" + places.get(i).getRating(), actions);
+
+						String name = details.getResult().getName();
+						if (name.length() > 40) {
+							name = details.getResult().getName().substring(0, 40);
+						}
+						String imageUrl = hcpUrl + "/PlaceImageServlet?placeId=" + details.getResult().getPlaceId().getId();
+						ButtonsTemplate button = createButtion(imageUrl, name,
+								details.getResult().getTypes().get(0) + " Rating :" + details.getResult().getRating(), actions);
 
 						Message message = (Message) new TemplateMessage(keyword, (Template) button);
 						if (message != null) {
 							messages.add(message);
 						}
 						i++;
-					} while (i < y);
-
+					} 
+					
+					
+					
+					NicePlace nice = (NicePlace) em.find(NicePlace.class, details.getResult().getPlaceId().getId());
+					if (nice == null) {
+						nice = new NicePlace(details.getResult());
+						nice.setCounter(1);
+						nice.setCreateDate(new java.util.Date());
+						nices.add(nice);
+					} else {
+						nice.setCounter(nice.getCounter()+1);
+						nice.setAddress(details.getResult().getFormattedAddress());
+						nice.setInternational_phone_number(details.getResult().getFormattedPhoneNumber());
+						nice.setLatitude(details.getResult().getLatitude());
+						nice.setLongitude(details.getResult().getLongitude());
+						nice.setName(details.getResult().getName());
+						nice.setPhoneNumber(details.getResult().getFormattedPhoneNumber());
+						nice.setRating(details.getResult().getRating());
+						nice.setTypes(details.getResult().getTypes());
+						nice.setVicinity(details.getResult().getVicinity());
+						nice.setWebsite(details.getResult().getWebsite());
+					}
 				}
+				
+				
 
 			} else if (STATUS_ZERO_RESULTS.equals(status)) {
 				// System.out.println("no results");
@@ -500,6 +550,18 @@ public class CallbackHCPServlet extends HttpServlet {
 			e.printStackTrace();
 		}
 		return messages;
+	}
+
+	private String generateSecret() {
+		char[] chars = "abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()".toCharArray();
+		StringBuilder sb = new StringBuilder();
+		Random random = new Random();
+		for (int i = 0; i < 6; i++) {
+			char c = chars[random.nextInt(chars.length)];
+			sb.append(c);
+		}
+		String output = sb.toString();
+		return output;
 	}
 
 	private TemplateMessage createRadius(String altText) {

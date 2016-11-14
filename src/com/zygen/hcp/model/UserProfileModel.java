@@ -13,20 +13,26 @@ import org.slf4j.LoggerFactory;
 
 import com.zygen.hcp.jpa.MessageEvent;
 import com.zygen.hcp.jpa.UserProfile;
-import com.zygen.linebot.callback.CallbackHCPServlet;
 import com.zygen.linebot.client.LineMessagingServiceBuilder;
 import com.zygen.linebot.model.profile.UserProfileResponse;
 
 import retrofit2.Response;
 
 public class UserProfileModel {
-	private static final Logger LOGGER = LoggerFactory.getLogger(CallbackHCPServlet.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(UserProfileModel.class);
 
-	public UserProfile checkCreateUserProfile(EntityManager em, String userId, String tanantId,String channelAccessToken,MessageEvent me) {
+	public UserProfile checkCreateUserProfile(EntityManager em, String tanantId,String channelAccessToken,MessageEvent me) {
 
-		Query query = em.createQuery("SELECT p FROM UserProfile p WHERE p.userId ='" + userId+ "'");
-		UserProfile user = new UserProfile();
-		try {
+		//Query query = em.createQuery("SELECT p FROM UserProfile p WHERE p.userId ='" + userId+ "'");
+		UserProfile user = em.find(UserProfile.class, me.getUserId());
+		if(user != null){
+			
+			updateUserProfile(user,channelAccessToken,me);
+		}else{
+			user = getUserProfile(channelAccessToken,me.getUserId());
+		}
+/*		try {
+			
 			user = (UserProfile) query.getSingleResult();
 			updateUserProfile(user,channelAccessToken,userId,me);
 			
@@ -36,7 +42,7 @@ public class UserProfileModel {
 			user = getUserProfile(channelAccessToken,userId,me);
 			
 			
-		}
+		}*/
 		return user;
 	}
 	public UserProfile checkCreateUserProfileRaduis(EntityManager em, String userId, String tanantId,String channelAccessToken,int r, MessageEvent jpe) {
@@ -128,11 +134,11 @@ public class UserProfileModel {
 		}
 		return user;
 	}
-	public UserProfile updateUserProfile(UserProfile user,String channelAccessToken,String userId,MessageEvent me) {
+	public UserProfile updateUserProfile(UserProfile user,String channelAccessToken,MessageEvent me) {
 		Response<UserProfileResponse> response;
 		//UserProfile user = new UserProfile();
 		try {
-			response = LineMessagingServiceBuilder.create(channelAccessToken).build().getProfile(userId)
+			response = LineMessagingServiceBuilder.create(channelAccessToken).build().getProfile(me.getUserId())
 					.execute();
 
 			if (response.isSuccessful()) {
@@ -141,7 +147,7 @@ public class UserProfileModel {
 				user.setPictureUrl(profile.getPictureUrl());
 				user.setStatusMessage(profile.getStatusMessage());
 				user.setLastActionDate(new Date());
-				user.setUserId(userId);
+				user.setUserId(me.getUserId());
 				ArrayList<MessageEvent> mel = new ArrayList<MessageEvent>();
 				mel.add(me);
 				user.setMessageEvent(mel);

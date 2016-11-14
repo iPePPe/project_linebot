@@ -1,15 +1,24 @@
 package com.zygen.hcp.jpa;
 
-import javax.persistence.*;
-import org.eclipse.persistence.annotations.Multitenant;
-import org.eclipse.persistence.annotations.TenantDiscriminatorColumn;
-
-import com.zygen.hcp.jpa.MessageEvent;
-import java.util.Collection;
-import java.util.Date;
 import static javax.persistence.TemporalType.DATE;
 import static javax.persistence.TemporalType.TIMESTAMP;
 
+import java.util.Collection;
+import java.util.Date;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+
+import org.eclipse.persistence.annotations.Multitenant;
+import org.eclipse.persistence.annotations.TenantDiscriminatorColumn;
 
 @Entity
 @Table(name = "UserProfile")
@@ -59,8 +68,7 @@ public class UserProfile {
 	private Date locationDate;
 	private String locationTitle;
 	private int radius;
-
-
+	private String rankby;
 	public String getPictureUrl() {
 		return pictureUrl;
 	}
@@ -229,6 +237,12 @@ public class UserProfile {
 		this.radius = param;
 	}
 
+	public String getRankby() {
+		return rankby;
+	}
 
+	public void setRankby(String param) {
+		this.rankby = param;
+	}
 
 }
