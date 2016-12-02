@@ -2,7 +2,7 @@ package com.zygen.ai.api;
 
 /***********************************************************************************************************************
  *
- * API.AI Java SDK - client-side libraries for API.AI
+ * API.AI Java SDK - client-side libraries for API.AId
  * =================================================
  *
  * Copyright (C) 2015 by Speaktoit, Inc. (https://www.speaktoit.com)
