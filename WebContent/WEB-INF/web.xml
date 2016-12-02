@@ -17,6 +17,10 @@
     <res-ref-name>sap-gateway-service</res-ref-name>
     <res-type>com.sap.core.connectivity.api.http.HttpDestination</res-type>
   </resource-ref>
+  <resource-ref>
+    <res-ref-name>KeyStoreService</res-ref-name>
+    <res-type>com.sap.cloud.crypto.keystore.api.KeyStoreService</res-type>
+  </resource-ref>
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>
     <welcome-file>index.htm</welcome-file>
@@ -95,5 +99,35 @@
   <servlet-mapping>
     <servlet-name>AgodaSearchBoxServlet</servlet-name>
     <url-pattern>/AgodaSearchBoxServlet</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>CallbackAiServlet</display-name>
+    <servlet-name>CallbackAiServlet</servlet-name>
+    <servlet-class>com.zygen.linebot.callback.CallbackAiServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>CallbackAiServlet</servlet-name>
+    <url-pattern>/CallbackAiServlet</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>TestAPIAIServlet</display-name>
+    <servlet-name>TestAPIAIServlet</servlet-name>
+    <servlet-class>com.zygen.api.ai.client.TestAPIAIServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>TestAPIAIServlet</servlet-name>
+    <url-pattern>/TestAPIAIServlet</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>SSLExampleServlet</display-name>
+    <servlet-name>SSLExampleServlet</servlet-name>
+    <servlet-class>com.zygen.api.ai.client.SSLExampleServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>SSLExampleServlet</servlet-name>
+    <url-pattern>/SSLExampleServlet</url-pattern>
   </servlet-mapping>
 </web-app>
