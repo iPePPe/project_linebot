@@ -56,4 +56,10 @@ public class GroupSource implements Source {
 		// TODO Auto-generated method stub
 		return userId;
 	}
+
+	@Override
+	public String getRoomId() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

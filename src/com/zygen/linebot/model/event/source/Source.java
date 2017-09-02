@@ -17,6 +17,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 )
 public interface Source {
     String getUserId();
+    String getGroupId();
+    String getRoomId();
 
     /**
      * message/event sender id. It might be userId/roomId/roomId.

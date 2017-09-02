@@ -48,12 +48,11 @@ public class UserProfileModel {
 		if(user != null){
 			
 			user = updateUserLocation(user,channelAccessToken,me);
-			user.setLocationDate(new Date());
-			user.setLatitude(me.getLatitude());
-			user.setLongitude(me.getLongitude());
-			user.setLocationTitle(me.getAddress());
+
 		}else{
 			user = getUserProfile(channelAccessToken,me.getUserId());
+			user = updateUserLocation(user,channelAccessToken,me);
+
 		}
 
 		return user;
@@ -62,6 +61,7 @@ public class UserProfileModel {
 		Response<UserProfileResponse> response;
 		UserProfile user = new UserProfile();
 		try {
+			
 			response = LineMessagingServiceBuilder.create(channelAccessToken).build().getProfile(userId)
 					.execute();
 
@@ -75,7 +75,7 @@ public class UserProfileModel {
 				user.setUserId(userId);
 
 			} else {
-				LOGGER.error(response.message());
+				//LOGGER.error(response.message());
 				//System.out.println(response.code() + " " + response.message());
 			}
 		} catch (IOException e) {

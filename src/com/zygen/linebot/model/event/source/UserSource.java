@@ -42,5 +42,17 @@ public class UserSource implements Source {
     	
     }
 
+	@Override
+	public String getGroupId() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getRoomId() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 }

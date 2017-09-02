@@ -130,4 +130,24 @@
     <servlet-name>SSLExampleServlet</servlet-name>
     <url-pattern>/SSLExampleServlet</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>WorkPlaceCallback</display-name>
+    <servlet-name>WorkPlaceCallback</servlet-name>
+    <servlet-class>com.zygen.workplace.callback.WorkPlaceCallback</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>WorkPlaceCallback</servlet-name>
+    <url-pattern>/WorkPlaceCallback</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>WPCallbackServlet</display-name>
+    <servlet-name>WPCallbackServlet</servlet-name>
+    <servlet-class>com.zygen.workplace.callback.WPCallbackServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>WPCallbackServlet</servlet-name>
+    <url-pattern>/WPCallback</url-pattern>
+  </servlet-mapping>
 </web-app>

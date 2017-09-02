@@ -39,6 +39,8 @@ public class MessageEvent {
 	@Temporal(TIMESTAMP)
 	private java.util.Date timestamp;
 	private String userId;
+	private String groupId;
+	private String roomId;
 	private String text;
 	private String channel;
 	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
@@ -208,6 +210,22 @@ public class MessageEvent {
 
 	public void setUrl(String param) {
 		this.url = param;
+	}
+
+	public String getGroupId() {
+		return groupId;
+	}
+
+	public void setGroupId(String groupId) {
+		this.groupId = groupId;
+	}
+
+	public String getRoomId() {
+		return roomId;
+	}
+
+	public void setRoomId(String roomId) {
+		this.roomId = roomId;
 	}
 
 }

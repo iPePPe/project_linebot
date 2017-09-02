@@ -50,6 +50,9 @@ import com.zygen.linebot.model.event.UnknownEvent;
 import com.zygen.linebot.model.event.message.TextMessageContent;
 import com.zygen.linebot.model.event.message.VideoMessageContent;
 import com.zygen.linebot.model.event.postback.PostbackContent;
+import com.zygen.linebot.model.event.source.GroupSource;
+import com.zygen.linebot.model.event.source.RoomSource;
+import com.zygen.linebot.model.event.source.UserSource;
 import com.zygen.linebot.model.message.Message;
 import com.zygen.linebot.model.message.TemplateMessage;
 import com.zygen.linebot.model.message.TextMessage;
@@ -203,7 +206,7 @@ public class CallbackHCPServlet extends HttpServlet {
 				throw new CallBackServletException("Invalid content");
 			} else {
 				final List<Event> events = callbackRequest.getEvents();
-
+				
 				for (Event event : events) {
 					try {
 						handleEvent(event, channelId);
@@ -247,7 +250,7 @@ public class CallbackHCPServlet extends HttpServlet {
 		EntityManager em = emf.createEntityManager();
 		UserProfileModel upm = new UserProfileModel();
 		UserProfile user = new UserProfile();
-
+		
 		em.getTransaction().begin();
 		em.setProperty("me-tenant.id", this.getCurrentTenantId());
 		try {
@@ -259,7 +262,17 @@ public class CallbackHCPServlet extends HttpServlet {
 				MessageEvent messageEvent = (MessageEvent) event;
 				me.setReplyToken(messageEvent.getReplyToken());
 				me.setTimestamp(Date.from(messageEvent.getTimestamp()));
-				me.setUserId(messageEvent.getSource().getUserId());
+				if (messageEvent.getSource() instanceof UserSource ){
+					me.setUserId(messageEvent.getSource().getUserId());
+				}else if (messageEvent.getSource() instanceof GroupSource ){
+					me.setUserId(messageEvent.getSource().getGroupId());
+					me.setGroupId(messageEvent.getSource().getGroupId());
+					user.setUserId(messageEvent.getSource().getGroupId());
+				}else if (messageEvent.getSource() instanceof RoomSource){
+					me.setUserId(messageEvent.getSource().getRoomId());
+					me.setRoomId(messageEvent.getSource().getRoomId());
+					user.setUserId(messageEvent.getSource().getRoomId());
+				}
 				me.setChannel(ch);
 
 				MessageContent message = messageEvent.getMessage();
@@ -300,7 +313,7 @@ public class CallbackHCPServlet extends HttpServlet {
 								|| textContent.getText().substring(0, 2).equals("#R")) {
 							TemplateMessage rediusTemplate = createRadius("Raduis");
 							reply((Message) rediusTemplate, messageEvent.getReplyToken());
-						} else {
+						} else if (textContent.getText().substring(0, 1).equals("@")) {
 
 							reply(nearbySearch(textContent.getText(), user, em), messageEvent.getReplyToken());
 						}

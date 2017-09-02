@@ -44,4 +44,16 @@ public class RoomSource implements Source {
 		// TODO Auto-generated method stub
 		return this.userId;
 	}
+
+	@Override
+	public String getGroupId() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getRoomId() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
